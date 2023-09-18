@@ -2,8 +2,11 @@ package controllers
 
 import (
 	"net/http"
+	"log"
 
 	"github.com/soicchi/auth_api/usecase"
+
+	"github.com/labstack/echo/v4"
 )
 
 type UserController struct {

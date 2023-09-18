@@ -4,26 +4,27 @@ import (
 	"fmt"
 
 	"github.com/soicchi/auth_api/models"
+	"github.com/soicchi/auth_api/utils"
 
-	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
 type UserService struct {
 	DB *gorm.DB
+	Validator *utils.CustomValidator
 }
 
-func NewUserService(db *gorm.DB, validator *validator.Validate) *UserService {
+func NewUserService(db *gorm.DB, cv *utils.CustomValidator) *UserService {
 	return &UserService{
 		DB:        db,
-		Validator: validator,
+		Validator: cv,
 	}
 }
 
 func (s *UserService) CreateUser(email string, password string) error {
 	user := models.NewUser(email, password)
 
-	if err := s.Validator.Struct(user); err != nil {
+	if err := s.Validator.Validate(user); err != nil {
 		return fmt.Errorf("error validating user struct %v", err)
 	}
 

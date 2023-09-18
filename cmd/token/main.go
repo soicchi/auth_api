@@ -5,13 +5,14 @@ import (
 
 	"github.com/soicchi/auth_api/models"
 	"github.com/soicchi/auth_api/routes"
+	"github.com/soicchi/auth_api/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
 	// Create database connection
-	_, err := models.ConnectDB()
+	db, err := models.ConnectDB()
 	if err != nil {
 		log.Fatalf("Failed to connect database: %v", err)
 	}
@@ -21,8 +22,8 @@ func main() {
 	e := echo.New()
 
 	// Initialize validator
-	e.Validator = utils.NewCustomValidator()
+	cv := utils.NewCustomValidator()
 
 	// Setup routes
-	routes.SetupRoutes(e)
+	routes.SetupRoutes(e, db, cv)
 }

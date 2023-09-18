@@ -7,17 +7,17 @@ import (
 )
 
 type CustomValidator struct {
-	validator *validator.Validate
+	Validator *validator.Validate
 }
 
-func NewCustomValdator() *CustomValidator {
+func NewCustomValidator() *CustomValidator {
 	return &CustomValidator{
-		validator: validator.New(),
+		Validator: validator.New(),
 	}
 }
 
 func (cv *CustomValidator) Validate(i interface{}) error {
-	if err := cv.validator.Struct(i); err != nil {
+	if err := cv.Validator.Struct(i); err != nil {
 		return fmt.Errorf("error validating struct %v", err)
 	}
 	return nil

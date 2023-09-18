@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
