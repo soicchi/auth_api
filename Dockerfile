@@ -3,4 +3,4 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-CMD ["go", "run", "./cmd/access_token/main.go"]
+CMD ["go", "run", "./cmd/token/main.go"]

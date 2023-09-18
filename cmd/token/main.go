@@ -4,6 +4,9 @@ import (
 	"log"
 
 	"github.com/soicchi/auth_api/models"
+	"github.com/soicchi/auth_api/routes"
+
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -14,4 +17,12 @@ func main() {
 	}
 
 	log.Println("Successfully connected to database")
+
+	e := echo.New()
+
+	// Initialize validator
+	e.Validator = utils.NewCustomValidator()
+
+	// Setup routes
+	routes.SetupRoutes(e)
 }
