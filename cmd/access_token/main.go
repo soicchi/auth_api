@@ -1,9 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"log"
+
+	"github.com/soicchi/auth_api/models"
 )
 
 func main() {
-	fmt.Println("Hello, world!")
+	// Create database connection
+	_, err := models.ConnectDB()
+	if err != nil {
+		log.Fatalf("Failed to connect database: %v", err)
+	}
+
+	log.Println("Successfully connected to database")
 }
