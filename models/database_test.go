@@ -8,12 +8,12 @@ import (
 
 func TestCreateDSN(t *testing.T) {
 	dbConfig := &dbConfig{
-		Host:     "host",
-		Port:     "port",
-		DBUser: "user",
-		DBName: "database",
+		Host:       "host",
+		Port:       "port",
+		DBUser:     "user",
+		DBName:     "database",
 		DBPassword: "password",
-		SSLMode: "disable",
+		SSLMode:    "disable",
 	}
 	dsn := dbConfig.createDSN()
 	assert.Equal(t, "host=host port=port user=user dbname=database password=password sslmode=disable", dsn)
@@ -21,100 +21,100 @@ func TestCreateDSN(t *testing.T) {
 
 func TestValidateDBConfig(t *testing.T) {
 	tests := []struct {
-		name string
+		name     string
 		dbConfig *dbConfig
-		ErrMsg string
-		wantErr bool
+		ErrMsg   string
+		wantErr  bool
 	}{
 		{
 			name: "valid",
 			dbConfig: &dbConfig{
-				Host: "host",
-				Port: "port",
-				DBUser: "user",
-				DBName: "database",
+				Host:       "host",
+				Port:       "port",
+				DBUser:     "user",
+				DBName:     "database",
 				DBPassword: "password",
-				SSLMode: "disable",
+				SSLMode:    "disable",
 			},
-			ErrMsg: "",
+			ErrMsg:  "",
 			wantErr: false,
 		},
 		{
 			name: "invalid host",
 			dbConfig: &dbConfig{
-				Host: "",
-				Port: "port",
-				DBUser: "user",
-				DBName: "database",
+				Host:       "",
+				Port:       "port",
+				DBUser:     "user",
+				DBName:     "database",
 				DBPassword: "password",
-				SSLMode: "disable",
+				SSLMode:    "disable",
 			},
-			ErrMsg: "DB_HOST is not set",
+			ErrMsg:  "DB_HOST is not set",
 			wantErr: true,
 		},
 		{
 			name: "invalid port",
 			dbConfig: &dbConfig{
-				Host: "host",
-				Port: "",
-				DBUser: "user",
-				DBName: "database",
+				Host:       "host",
+				Port:       "",
+				DBUser:     "user",
+				DBName:     "database",
 				DBPassword: "password",
-				SSLMode: "disable",
+				SSLMode:    "disable",
 			},
-			ErrMsg: "DB_PORT is not set",
+			ErrMsg:  "DB_PORT is not set",
 			wantErr: true,
 		},
 		{
 			name: "invalid user",
 			dbConfig: &dbConfig{
-				Host: "host",
-				Port: "port",
-				DBUser: "",
-				DBName: "database",
+				Host:       "host",
+				Port:       "port",
+				DBUser:     "",
+				DBName:     "database",
 				DBPassword: "password",
-				SSLMode: "disable",
+				SSLMode:    "disable",
 			},
-			ErrMsg: "DB_USER is not set",
+			ErrMsg:  "DB_USER is not set",
 			wantErr: true,
 		},
 		{
 			name: "invalid dbname",
 			dbConfig: &dbConfig{
-				Host: "host",
-				Port: "port",
-				DBUser: "user",
-				DBName: "",
+				Host:       "host",
+				Port:       "port",
+				DBUser:     "user",
+				DBName:     "",
 				DBPassword: "password",
-				SSLMode: "disable",
+				SSLMode:    "disable",
 			},
-			ErrMsg: "DB_NAME is not set",
+			ErrMsg:  "DB_NAME is not set",
 			wantErr: true,
 		},
 		{
 			name: "invalid password",
 			dbConfig: &dbConfig{
-				Host: "host",
-				Port: "port",
-				DBUser: "user",
-				DBName: "database",
+				Host:       "host",
+				Port:       "port",
+				DBUser:     "user",
+				DBName:     "database",
 				DBPassword: "",
-				SSLMode: "disable",
+				SSLMode:    "disable",
 			},
-			ErrMsg: "DB_PASSWORD is not set",
+			ErrMsg:  "DB_PASSWORD is not set",
 			wantErr: true,
 		},
 		{
 			name: "invalid sslmode",
 			dbConfig: &dbConfig{
-				Host: "host",
-				Port: "port",
-				DBUser: "user",
-				DBName: "database",
+				Host:       "host",
+				Port:       "port",
+				DBUser:     "user",
+				DBName:     "database",
 				DBPassword: "password",
-				SSLMode: "invalid",
+				SSLMode:    "invalid",
 			},
-			ErrMsg: "DB_SSL_MODE is invalid value",
+			ErrMsg:  "DB_SSL_MODE is invalid value",
 			wantErr: true,
 		},
 	}

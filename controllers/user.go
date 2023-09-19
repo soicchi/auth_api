@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 
 	"github.com/soicchi/auth_api/usecase"
 
