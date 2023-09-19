@@ -4,20 +4,27 @@ import (
 	"fmt"
 
 	"github.com/soicchi/auth_api/models"
-	"github.com/soicchi/auth_api/utils"
 
 	"gorm.io/gorm"
 )
 
-type UserService struct {
-	DB *gorm.DB
-	Validator *utils.CustomValidator
+type IFDatabase interface {
+	Create(value interface{}) *gorm.DB
 }
 
-func NewUserService(db *gorm.DB, cv *utils.CustomValidator) *UserService {
+type IFValidator interface {
+	Validate(value interface{}) error
+}
+
+type UserService struct {
+	DB        IFDatabase
+	Validator IFValidator
+}
+
+func NewUserService(db IFDatabase, v IFValidator) *UserService {
 	return &UserService{
 		DB:        db,
-		Validator: cv,
+		Validator: v,
 	}
 }
 
@@ -28,8 +35,9 @@ func (s *UserService) CreateUser(email string, password string) error {
 		return fmt.Errorf("error validating user struct %v", err)
 	}
 
-	if err := s.DB.Create(user).Error; err != nil {
-		return fmt.Errorf("error creating user %v", err)
+	result := s.DB.Create(user)
+	if result.Error != nil {
+		return fmt.Errorf("error creating user %v", result.Error)
 	}
 
 	return nil
