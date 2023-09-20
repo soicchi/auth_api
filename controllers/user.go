@@ -4,13 +4,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/soicchi/auth_api/usecase"
-
 	"github.com/labstack/echo/v4"
 )
 
+type IFUserService interface {
+	CreateUser(email, password string) error
+}
+
 type UserController struct {
-	UserService *usecase.UserService
+	UserService IFUserService
 }
 
 type SignUpRequest struct {
@@ -18,7 +20,7 @@ type SignUpRequest struct {
 	Password string `json:"password"`
 }
 
-func NewUserController(us *usecase.UserService) *UserController {
+func NewUserController(us IFUserService) *UserController {
 	return &UserController{
 		UserService: us,
 	}
