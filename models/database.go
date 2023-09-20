@@ -73,3 +73,7 @@ func (dbConfig *dbConfig) createDSN() string {
 		dbConfig.Host, dbConfig.Port, dbConfig.DBUser, dbConfig.DBName, dbConfig.DBPassword, dbConfig.SSLMode,
 	)
 }
+
+func Migrate(db *gorm.DB) error {
+	return db.AutoMigrate(&User{})
+}

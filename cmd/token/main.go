@@ -2,12 +2,11 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/soicchi/auth_api/models"
 	"github.com/soicchi/auth_api/routes"
 	"github.com/soicchi/auth_api/utils"
-
-	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -19,11 +18,15 @@ func main() {
 
 	log.Println("Successfully connected to database")
 
-	e := echo.New()
+	// Migrate database
+	models.Migrate(db)
+
+	log.Println("Successfully migrated database")
 
 	// Initialize validator
 	cv := utils.NewCustomValidator()
 
 	// Setup routes
-	routes.SetupRoutes(e, db, cv)
+	e := routes.SetupRoutes(db, cv)
+	e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
 }

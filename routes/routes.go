@@ -10,7 +10,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupRoutes(e *echo.Echo, db *gorm.DB, cv *utils.CustomValidator) {
+func SetupRoutes(db *gorm.DB, cv *utils.CustomValidator) *echo.Echo {
+	e := echo.New()
+
 	// Initialize base middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -25,4 +27,6 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB, cv *utils.CustomValidator) {
 	// Access token routes
 	token := v1.Group("/token")
 	token.POST("/signup", userController.SignUp)
+
+	return e
 }
