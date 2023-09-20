@@ -3,8 +3,8 @@ package utils
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/go-playground/validator/v10"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewCustomValidator(t *testing.T) {
