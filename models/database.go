@@ -18,14 +18,12 @@ type dbConfig struct {
 	SSLMode    string
 }
 
-var sslModes []string = []string{"disable", "require"}
-
 func ConnectDB() (*gorm.DB, error) {
 	dbConfig := newDBConfig()
 	if err := dbConfig.validateDBConfig(); err != nil {
 		return nil, fmt.Errorf("failed to validate DB config: %w", err)
 	}
-
+	
 	dsn := dbConfig.createDSN()
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -35,6 +33,8 @@ func ConnectDB() (*gorm.DB, error) {
 }
 
 func (dbConfig *dbConfig) validateDBConfig() error {
+	sslModes := []string{"disable", "require"}
+
 	if dbConfig.Host == "" {
 		return fmt.Errorf("DB_HOST is not set")
 	}
