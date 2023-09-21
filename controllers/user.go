@@ -31,7 +31,7 @@ func (c *UserController) SignUp(ctx echo.Context) error {
 	var req SignUpRequest
 	if err := ctx.Bind(&req); err != nil {
 		log.Printf("Failed to bind request: %v", err)
-		return utils.BadRequestResponse(ctx, "Invalid request", nil) 
+		return utils.BadRequestResponse(ctx, "Invalid request", nil)
 	}
 
 	if err := c.UserService.CreateUser(req.Email, req.Password); err != nil {

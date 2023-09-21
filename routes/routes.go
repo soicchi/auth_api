@@ -25,7 +25,7 @@ func SetupRoutes(db *gorm.DB, cv *utils.CustomValidator) *echo.Echo {
 	userController := controllers.NewUserController(userService)
 
 	// Access token routes
-	token := v1.Group("/token")
+	token := v1.Group("/basic")
 	token.POST("/signup", userController.SignUp)
 
 	return e
