@@ -39,7 +39,7 @@ func TestSignUpValid(t *testing.T) {
 
 	t.Run("valid request", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodPost, baseURI+"/signup", strings.NewReader(userJSON))
+		req := httptest.NewRequest(http.MethodPost, baseURI+"/token/signup", strings.NewReader(userJSON))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
@@ -58,7 +58,7 @@ func TestSignUpCreateUserError(t *testing.T) {
 
 	t.Run("failed create user", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodPost, baseURI+"/signup", strings.NewReader(userJSON))
+		req := httptest.NewRequest(http.MethodPost, baseURI+"/token/signup", strings.NewReader(userJSON))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
@@ -76,7 +76,7 @@ func TestSignBindError(t *testing.T) {
 
 	t.Run("bind error", func(t *testing.T) {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodPost, baseURI+"/signup", strings.NewReader(userJSON))
+		req := httptest.NewRequest(http.MethodPost, baseURI+"/token/signup", strings.NewReader(userJSON))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
