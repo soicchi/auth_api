@@ -23,7 +23,7 @@ func ConnectDB() (*gorm.DB, error) {
 	if err := dbConfig.validateDBConfig(); err != nil {
 		return nil, fmt.Errorf("failed to validate DB config: %w", err)
 	}
-	
+
 	dsn := dbConfig.createDSN()
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
