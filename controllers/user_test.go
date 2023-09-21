@@ -46,7 +46,7 @@ func TestSignUpValid(t *testing.T) {
 
 		uc.SignUp(ctx)
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "\"Successfully created user\"\n", rec.Body.String())
+		assert.Equal(t, "{\"data\":null,\"message\":\"Successfully created user\"}\n", rec.Body.String())
 	})
 }
 
@@ -64,7 +64,7 @@ func TestSignUpCreateUserError(t *testing.T) {
 		ctx := e.NewContext(req, rec)
 
 		uc.SignUp(ctx)
-		assert.Equal(t, "\"Failed to create user\"\n", rec.Body.String())
+		assert.Equal(t, "{\"data\":null,\"message\":\"Failed to create user\"}\n", rec.Body.String())
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	})
 }
@@ -82,7 +82,7 @@ func TestSignBindError(t *testing.T) {
 		ctx := e.NewContext(req, rec)
 
 		uc.SignUp(ctx)
-		assert.Equal(t, "\"Invalid request\"\n", rec.Body.String())
+		assert.Equal(t, "{\"data\":null,\"message\":\"Invalid request\"}\n", rec.Body.String())
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 	})
 }
