@@ -3,7 +3,7 @@ package controllers
 import (
 	"log"
 
-	"github.com/soicchi/auth_api/utils"
+	"github.com/soicchi/auth_api/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )

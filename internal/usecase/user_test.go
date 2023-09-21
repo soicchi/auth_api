@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/soicchi/auth_api/models"
+	"github.com/soicchi/auth_api/internal/models"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -32,7 +32,7 @@ func (m *MockValidator) Validate(value interface{}) error {
 func TestCreateUserValid(t *testing.T) {
 	var mockDB MockDB
 	var mockValidator MockValidator
-	user := models.NewUser("test@test.com", "password")
+	user := &models.User{Email: "test@test.com", Password: "password"}
 	mockDB.On("Create", user).Return(&gorm.DB{Error: nil})
 	mockValidator.On("Validate", user).Return(nil)
 	service := NewUserService(&mockDB, &mockValidator)
@@ -49,7 +49,7 @@ func TestCreateUserValid(t *testing.T) {
 func TestCreateUserValidateError(t *testing.T) {
 	var mockDB MockDB
 	var mockValidator MockValidator
-	user := models.NewUser("test", "password")
+	user := &models.User{Email: "test", Password: "password"}
 	mockValidator.On("Validate", user).Return(errors.New("validation error"))
 	service := NewUserService(&mockDB, &mockValidator)
 
@@ -66,7 +66,7 @@ func TestCreateUserDBError(t *testing.T) {
 	var mockDB MockDB
 	var mockValidator MockValidator
 
-	user := models.NewUser("test@test.com", "password")
+	user := &models.User{Email: "test@test.com", Password: "password"}
 	mockValidator.On("Validate", user).Return(nil)
 	mockDB.On("Create", user).Return(&gorm.DB{Error: errors.New("db error")})
 

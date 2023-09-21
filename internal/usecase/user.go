@@ -3,7 +3,7 @@ package usecase
 import (
 	"fmt"
 
-	"github.com/soicchi/auth_api/models"
+	"github.com/soicchi/auth_api/internal/models"
 
 	"gorm.io/gorm"
 )

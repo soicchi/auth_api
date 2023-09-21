@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"github.com/soicchi/auth_api/controllers"
-	"github.com/soicchi/auth_api/usecase"
-	"github.com/soicchi/auth_api/utils"
+	"github.com/soicchi/auth_api/internal/controllers"
+	"github.com/soicchi/auth_api/internal/usecase"
+	"github.com/soicchi/auth_api/internal/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

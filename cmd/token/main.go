@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/soicchi/auth_api/models"
-	"github.com/soicchi/auth_api/routes"
-	"github.com/soicchi/auth_api/utils"
+	"github.com/soicchi/auth_api/internal/models"
+	"github.com/soicchi/auth_api/internal/routes"
+	"github.com/soicchi/auth_api/internal/utils"
 )
 
 func main() {
