@@ -5,17 +5,15 @@ import (
 	"testing"
 
 	"github.com/soicchi/auth_api/internal/models"
+	"github.com/soicchi/auth_api/internal/utils"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
+	"github.com/go-playground/validator/v10"
 )
 
 type MockDB struct {
-	mock.Mock
-}
-
-type MockValidator struct {
 	mock.Mock
 }
 
@@ -24,70 +22,67 @@ func (m *MockDB) Create(value interface{}) *gorm.DB {
 	return args.Get(0).(*gorm.DB)
 }
 
-func (m *MockValidator) Validate(value interface{}) error {
-	args := m.Called(value)
-	return args.Error(0)
-}
-
 func TestCreateUserValid(t *testing.T) {
 	var mockDB MockDB
-	var mockValidator MockValidator
+	cv := utils.CustomValidator{Validator: validator.New()}
 	user := &models.User{Email: "test@test.com", Password: "password"}
 	mockDB.On("Create", user).Return(&gorm.DB{Error: nil})
-	mockValidator.On("Validate", user).Return(nil)
-	service := NewUserService(&mockDB, &mockValidator)
+	service := &UserService{
+		DB:        &mockDB,
+		Validator: &cv,
+	}
 
 	t.Run("create user successfully", func(t *testing.T) {
 		err := service.CreateUser(user.Email, user.Password)
 
 		assert.NoError(t, err)
-		mockValidator.AssertExpectations(t)
 		mockDB.AssertExpectations(t)
 	})
 }
 
 func TestCreateUserValidateError(t *testing.T) {
 	var mockDB MockDB
-	var mockValidator MockValidator
+	cv := utils.CustomValidator{Validator: validator.New()}
 	user := &models.User{Email: "test", Password: "password"}
-	mockValidator.On("Validate", user).Return(errors.New("validation error"))
-	service := NewUserService(&mockDB, &mockValidator)
+	service := &UserService{
+		DB:        &mockDB,
+		Validator: &cv,
+	}
 
 	t.Run("validation error", func(t *testing.T) {
 		err := service.CreateUser(user.Email, user.Password)
 
 		assert.Error(t, err)
-		assert.Equal(t, "error validating user struct validation error", err.Error())
-		mockValidator.AssertExpectations(t)
+		assert.Equal(t, "error validating user struct error validating struct Key: 'User.Email' Error:Field validation for 'Email' failed on the 'email' tag", err.Error())
 	})
 }
 
 func TestCreateUserDBError(t *testing.T) {
 	var mockDB MockDB
-	var mockValidator MockValidator
+	cv := utils.CustomValidator{Validator: validator.New()}
 
 	user := &models.User{Email: "test@test.com", Password: "password"}
-	mockValidator.On("Validate", user).Return(nil)
 	mockDB.On("Create", user).Return(&gorm.DB{Error: errors.New("db error")})
-
-	service := NewUserService(&mockDB, &mockValidator)
+	service := &UserService{
+		DB:        &mockDB,
+		Validator: &cv,
+	}
 
 	t.Run("db error", func(t *testing.T) {
 		err := service.CreateUser(user.Email, user.Password)
 
 		assert.Error(t, err)
 		assert.Equal(t, "error creating user db error", err.Error())
-		mockValidator.AssertExpectations(t)
 		mockDB.AssertExpectations(t)
 	})
 }
 
 func TestNewUserService(t *testing.T) {
 	var mockDB MockDB
-	var mockValidator MockValidator
-	service := NewUserService(&mockDB, &mockValidator)
+	cv := utils.CustomValidator{Validator: validator.New()}
+	service := NewUserService(&mockDB, &cv)
 
 	assert.IsType(t, &UserService{}, service)
 	assert.Equal(t, &mockDB, service.DB)
-	assert.Equal(t, &mockValidator, service.Validator)
+	assert.Equal(t, &cv, service.Validator)
 }

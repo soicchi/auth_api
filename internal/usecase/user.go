@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/soicchi/auth_api/internal/models"
+	"github.com/soicchi/auth_api/internal/utils"
 
 	"gorm.io/gorm"
 )
@@ -12,19 +13,15 @@ type IFDatabase interface {
 	Create(value interface{}) *gorm.DB
 }
 
-type IFValidator interface {
-	Validate(value interface{}) error
-}
-
 type UserService struct {
 	DB        IFDatabase
-	Validator IFValidator
+	Validator *utils.CustomValidator 
 }
 
-func NewUserService(db IFDatabase, v IFValidator) *UserService {
+func NewUserService(db IFDatabase, validator *utils.CustomValidator) *UserService {
 	return &UserService{
 		DB:        db,
-		Validator: v,
+		Validator: validator,
 	}
 }
 
