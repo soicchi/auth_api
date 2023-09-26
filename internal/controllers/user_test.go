@@ -18,10 +18,15 @@ type MockUserService struct {
 	mock.Mock
 }
 
-func setup() *echo.Echo {
+func setup(uri, inputJSON string) (*httptest.ResponseRecorder, echo.Context) {
 	e := echo.New()
 	e.Validator = utils.NewCustomValidator()
-	return e
+	req := httptest.NewRequest(http.MethodPost, uri, strings.NewReader(inputJSON))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+
+	return rec, ctx
 }
 
 func (m *MockUserService) CreateUser(email, password string) error {
@@ -42,11 +47,7 @@ func TestSignUpValid(t *testing.T) {
 	handler := &UserHandler{Service: &mockUserService}
 	userJSON := `{"email": "test@test.com", "password": "password"}`
 
-	e := setup()
-	req := httptest.NewRequest(http.MethodPost, "/basic/signup", strings.NewReader(userJSON))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	ctx := e.NewContext(req, rec)
+	rec, ctx := setup("/basic/signup", userJSON)
 
 	handler.SignUp(ctx)
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -59,11 +60,7 @@ func TestSignWithBindError(t *testing.T) {
 	handler := &UserHandler{Service: &mockUserService}
 	userJSON := `{"email": "test@test.com", "invalid": }`
 
-	e := setup()
-	req := httptest.NewRequest(http.MethodPost, "/basic/signup", strings.NewReader(userJSON))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	ctx := e.NewContext(req, rec)
+	rec, ctx := setup("/basic/signup", userJSON)
 
 	handler.SignUp(ctx)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
@@ -76,11 +73,7 @@ func TestSignUpWithEmailValidateError(t *testing.T) {
 	handler := &UserHandler{Service: &mockUserService}
 	userJSON := `{"email": "test", "password": "password"}`
 
-	e := setup()
-	req := httptest.NewRequest(http.MethodPost, "/basic/signup", strings.NewReader(userJSON))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	ctx := e.NewContext(req, rec)
+	rec, ctx := setup("/basic/signup", userJSON)
 
 	handler.SignUp(ctx)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
@@ -93,11 +86,7 @@ func TestSignUpWithPasswordValidateError(t *testing.T) {
 	handler := &UserHandler{Service: &mockUserService}
 	userJSON := `{"email": "test@test.com", "password": "pass"}`
 
-	e := setup()
-	req := httptest.NewRequest(http.MethodPost, "/basic/signup", strings.NewReader(userJSON))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	ctx := e.NewContext(req, rec)
+	rec, ctx := setup("/basic/signup", userJSON)
 
 	handler.SignUp(ctx)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
@@ -111,11 +100,7 @@ func TestSignUpWithCreateUserError(t *testing.T) {
 	handler := &UserHandler{Service: &mockUserService}
 	userJSON := `{"email": "test@test.com", "password": "password"}`
 
-	e := setup()
-	req := httptest.NewRequest(http.MethodPost, "/basic/signup", strings.NewReader(userJSON))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	ctx := e.NewContext(req, rec)
+	rec, ctx := setup("/basic/signup", userJSON)
 
 	handler.SignUp(ctx)
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
