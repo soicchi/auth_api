@@ -32,12 +32,17 @@ func StatusOKResponse(ctx echo.Context, message string, data interface{}) error 
 	return res.JSONResponse(ctx)
 }
 
-func BadRequestResponse(ctx echo.Context, message string, data interface{}) error {
-	res := NewResponse(http.StatusBadRequest, message, data)
+func BadRequestResponse(ctx echo.Context, message string) error {
+	res := NewResponse(http.StatusBadRequest, message, nil)
 	return res.JSONResponse(ctx)
 }
 
-func InternalServerErrorResponse(ctx echo.Context, message string, data interface{}) error {
-	res := NewResponse(http.StatusInternalServerError, message, data)
+func InternalServerErrorResponse(ctx echo.Context, message string) error {
+	res := NewResponse(http.StatusInternalServerError, message, nil)
+	return res.JSONResponse(ctx)
+}
+
+func UnauthorizedResponse(ctx echo.Context, message string) error {
+	res := NewResponse(http.StatusUnauthorized, message, nil)
 	return res.JSONResponse(ctx)
 }

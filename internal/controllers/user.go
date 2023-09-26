@@ -31,17 +31,17 @@ func (c *UserHandler) SignUp(ctx echo.Context) error {
 	var req SignUpRequest
 	if err := ctx.Bind(&req); err != nil {
 		log.Printf("Failed to bind request: %v", err)
-		return utils.BadRequestResponse(ctx, "Invalid request", nil)
+		return utils.BadRequestResponse(ctx, "Invalid request")
 	}
 
 	if err := ctx.Validate(req); err != nil {
 		log.Printf("Failed to validate request: %v", err)
-		return utils.BadRequestResponse(ctx, "Invalid request", nil)
+		return utils.BadRequestResponse(ctx, "Invalid request")
 	}
 
 	if err := c.Service.CreateUser(req.Email, req.Password); err != nil {
 		log.Printf("Failed to create user: %v", err)
-		return utils.InternalServerErrorResponse(ctx, "Failed to create user", nil)
+		return utils.InternalServerErrorResponse(ctx, "Failed to create user")
 	}
 
 	return utils.StatusOKResponse(ctx, "Successfully created user", nil)

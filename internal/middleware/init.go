@@ -6,6 +6,9 @@ import (
 )
 
 func InitializeMiddleware(e *echo.Echo) {
+	// Remove trailing slash
+	e.Pre(middleware.RemoveTrailingSlash())
+
 	// Initialize base middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())

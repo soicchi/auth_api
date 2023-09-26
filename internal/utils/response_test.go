@@ -54,11 +54,10 @@ func TestBadRequestResponse(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	ctx := e.NewContext(req, rec)
-	err := BadRequestResponse(ctx, "Bad Request", "TestError")
+	err := BadRequestResponse(ctx, "Bad Request")
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 	assert.Contains(t, rec.Body.String(), "\"message\":\"Bad Request\"")
-	assert.Contains(t, rec.Body.String(), "\"data\":\"TestError\"")
 }
 
 func TestInternalServerErrorResponse(t *testing.T) {
@@ -67,9 +66,20 @@ func TestInternalServerErrorResponse(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	ctx := e.NewContext(req, rec)
-	err := InternalServerErrorResponse(ctx, "Internal Error", "TestError")
+	err := InternalServerErrorResponse(ctx, "Internal Error")
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	assert.Contains(t, rec.Body.String(), "\"message\":\"Internal Error\"")
-	assert.Contains(t, rec.Body.String(), "\"data\":\"TestError\"")
+}
+
+func TestUnAuthorizedResponse(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/sigup", bytes.NewReader([]byte{}))
+	rec := httptest.NewRecorder()
+
+	ctx := e.NewContext(req, rec)
+	err := UnauthorizedResponse(ctx, "Unauthorized")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	assert.Contains(t, rec.Body.String(), "\"message\":\"Unauthorized\"")
 }

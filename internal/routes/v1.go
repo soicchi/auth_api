@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/soicchi/auth_api/internal/controllers"
+	"github.com/soicchi/auth_api/internal/middleware"
 	"github.com/soicchi/auth_api/internal/models"
 	"github.com/soicchi/auth_api/internal/usecase"
 
@@ -16,5 +17,6 @@ func setupV1Routes(v1 *echo.Group, db *gorm.DB) {
 	userHandler := controllers.NewUserHandler(userService)
 
 	basic := v1.Group("/basic")
+	basic.Use(middleware.BasicAuth)
 	basic.POST("/signup", userHandler.SignUp)
 }
