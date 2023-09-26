@@ -2,8 +2,8 @@ package models
 
 import (
 	"fmt"
-	"os"
 	"log"
+	"os"
 
 	"golang.org/x/exp/slices"
 	"gorm.io/driver/postgres"

@@ -22,7 +22,7 @@ func (m *MockUserRepository) CreateUser(user *models.User) error {
 func TestCreateUserValid(t *testing.T) {
 	var mockUserRepo MockUserRepository
 	user := &models.User{Email: "test@test.com", Password: "password"}
-	mockUserRepo.On("CreateUser", user).Return(nil)
+	mockUserRepo.On("CreateUser", mock.Anything).Return(nil)
 	userService := &UserServiceImpl{Repo: &mockUserRepo}
 
 	err := userService.CreateUser(user.Email, user.Password)
@@ -31,10 +31,10 @@ func TestCreateUserValid(t *testing.T) {
 	mockUserRepo.AssertExpectations(t)
 }
 
-func TestCreateUserWithError(t *testing.T) {
+func TestCreateUserWithCreateError(t *testing.T) {
 	var mockUserRepo MockUserRepository
 	user := &models.User{Email: "test@test.com", Password: "password"}
-	mockUserRepo.On("CreateUser", user).Return(fmt.Errorf("db error"))
+	mockUserRepo.On("CreateUser", mock.Anything).Return(fmt.Errorf("db error"))
 	userService := &UserServiceImpl{Repo: &mockUserRepo}
 
 	err := userService.CreateUser(user.Email, user.Password)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/soicchi/auth_api/internal/models"
+	"github.com/soicchi/auth_api/internal/utils"
 )
 
 type UserServiceImpl struct {
@@ -23,8 +24,14 @@ func NewUserServiceImpl(repo UserRepository) *UserServiceImpl {
 func (s *UserServiceImpl) CreateUser(email string, password string) error {
 	user := models.NewUser(email, password)
 
-	err := s.Repo.CreateUser(user)
+	// hash password
+	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
+		return fmt.Errorf("error hashing password %v", err)
+	}
+	user.Password = hashedPassword
+
+	if err := s.Repo.CreateUser(user); err != nil {
 		return fmt.Errorf("error creating user %v", err)
 	}
 
