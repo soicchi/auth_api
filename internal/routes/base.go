@@ -13,10 +13,8 @@ func SetupRoutes(db *gorm.DB) *echo.Echo {
 	// Initialize base middleware
 	middleware.InitializeMiddleware(e)
 
-	// Base routes
-	v1 := e.Group("/api/v1")
-
 	// Setup v1 routes
+	v1 := e.Group("/api/v1")
 	setupV1Routes(v1, db)
 
 	return e
