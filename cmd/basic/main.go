@@ -22,5 +22,5 @@ func main() {
 	e := routes.SetupRoutes(db)
 	e.Validator = utils.NewCustomValidator()
 
-	e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
+	e.Logger.Fatal(e.Start(":" + os.Getenv("API_PORT")))
 }

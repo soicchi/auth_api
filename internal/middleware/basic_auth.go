@@ -11,7 +11,7 @@ import (
 
 func BasicAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		username := os.Getenv("BASIC_AUTH_USERNAME")
+		username := os.Getenv("BASIC_AUTH_USER")
 		password := os.Getenv("BASIC_AUTH_PASSWORD")
 
 		if username == "" || password == "" {
@@ -35,5 +35,5 @@ func BasicAuth(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func checkCredentials(username, password string) bool {
-	return subtle.ConstantTimeCompare([]byte(username), []byte(os.Getenv("BASIC_AUTH_USERNAME"))) == 1 && subtle.ConstantTimeCompare([]byte(password), []byte(os.Getenv("BASIC_AUTH_PASSWORD"))) == 1
+	return subtle.ConstantTimeCompare([]byte(username), []byte(os.Getenv("BASIC_AUTH_USER"))) == 1 && subtle.ConstantTimeCompare([]byte(password), []byte(os.Getenv("BASIC_AUTH_PASSWORD"))) == 1
 }

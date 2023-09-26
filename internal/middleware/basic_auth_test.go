@@ -130,6 +130,6 @@ func basicAuthHeader(username, password string) string {
 }
 
 func setENV() {
-	os.Setenv("BASIC_AUTH_USERNAME", "test")
+	os.Setenv("BASIC_AUTH_USER", "test")
 	os.Setenv("BASIC_AUTH_PASSWORD", "password")
 }
