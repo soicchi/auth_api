@@ -10,18 +10,13 @@ import (
 )
 
 func main() {
-	// Create database connection
-	db, err := models.ConnectDB()
+	// Setup database
+	db, err := models.SetupDB()
 	if err != nil {
 		log.Fatalf("Failed to connect database: %v", err)
 	}
 
-	log.Println("Successfully connected to database")
-
-	// Migrate database
-	models.Migrate(db)
-
-	log.Println("Successfully migrated database")
+	log.Println("Successfully setup database")
 
 	// Setup routes
 	e := routes.SetupRoutes(db)

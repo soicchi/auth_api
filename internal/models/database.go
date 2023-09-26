@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"os"
+	"log"
 
 	"golang.org/x/exp/slices"
 	"gorm.io/driver/postgres"
@@ -16,6 +17,25 @@ type dbConfig struct {
 	DBName     string
 	DBPassword string
 	SSLMode    string
+}
+
+func SetupDB() (*gorm.DB, error) {
+	// Connect database
+	db, err := ConnectDB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect database: %w", err)
+	}
+
+	log.Println("Successfully connected to database")
+
+	// Migrate database
+	if err := migrate(db); err != nil {
+		return nil, fmt.Errorf("failed to migrate database: %w", err)
+	}
+
+	log.Println("Successfully migrated database")
+
+	return db, nil
 }
 
 func ConnectDB() (*gorm.DB, error) {
@@ -74,6 +94,6 @@ func (dbConfig *dbConfig) createDSN() string {
 	)
 }
 
-func Migrate(db *gorm.DB) error {
+func migrate(db *gorm.DB) error {
 	return db.AutoMigrate(&User{})
 }
