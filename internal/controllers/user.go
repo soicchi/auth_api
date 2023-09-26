@@ -8,33 +8,38 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type IFUserService interface {
+type UserService interface {
 	CreateUser(email, password string) error
 }
 
-type UserController struct {
-	UserService IFUserService
+type UserHandler struct {
+	Service UserService
 }
 
 type SignUpRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8"`
 }
 
-func NewUserController(us IFUserService) *UserController {
-	return &UserController{
-		UserService: us,
+func NewUserHandler(service UserService) *UserHandler {
+	return &UserHandler{
+		Service: service,
 	}
 }
 
-func (c *UserController) SignUp(ctx echo.Context) error {
+func (c *UserHandler) SignUp(ctx echo.Context) error {
 	var req SignUpRequest
 	if err := ctx.Bind(&req); err != nil {
 		log.Printf("Failed to bind request: %v", err)
 		return utils.BadRequestResponse(ctx, "Invalid request", nil)
 	}
 
-	if err := c.UserService.CreateUser(req.Email, req.Password); err != nil {
+	if err := ctx.Validate(req); err != nil {
+		log.Printf("Failed to validate request: %v", err)
+		return utils.BadRequestResponse(ctx, "Invalid request", nil)
+	}
+
+	if err := c.Service.CreateUser(req.Email, req.Password); err != nil {
 		log.Printf("Failed to create user: %v", err)
 		return utils.InternalServerErrorResponse(ctx, "Failed to create user", nil)
 	}

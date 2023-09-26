@@ -23,10 +23,9 @@ func main() {
 
 	log.Println("Successfully migrated database")
 
-	// Initialize validator
-	cv := utils.NewCustomValidator()
-
 	// Setup routes
-	e := routes.SetupRoutes(db, cv)
+	e := routes.SetupRoutes(db)
+	e.Validator = utils.NewCustomValidator()
+
 	e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
 }

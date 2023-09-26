@@ -25,9 +25,21 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - 5432:${DB_PORT}
+      - 5431:${DB_PORT}
     volumes:
       - postgres:/var/lib/postgresql/data
-    
+
+  test-db:
+    image: postgres:16.0
+    container_name: auth_test_db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${TEST_DB_USER}
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD}
+      POSTGRES_DB: ${TEST_DB_NAME}
+    ports:
+      - 5433:${DB_PORT}
+
 volumes:
   postgres:

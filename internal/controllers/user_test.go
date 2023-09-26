@@ -1,23 +1,27 @@
 package controllers
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/soicchi/auth_api/internal/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-const (
-	baseURI string = "/api/v1"
-)
-
 type MockUserService struct {
 	mock.Mock
+}
+
+func setup() *echo.Echo {
+	e := echo.New()
+	e.Validator = utils.NewCustomValidator()
+	return e
 }
 
 func (m *MockUserService) CreateUser(email, password string) error {
@@ -25,64 +29,96 @@ func (m *MockUserService) CreateUser(email, password string) error {
 	return args.Error(0)
 }
 
-func TestNewUserController(t *testing.T) {
-	uc := NewUserController(nil)
-	assert.NotNil(t, uc)
-	assert.IsType(t, &UserController{}, uc)
+func TestNewUserHandler(t *testing.T) {
+	service := &MockUserService{}
+	handler := NewUserHandler(service)
+	assert.NotNil(t, handler)
+	assert.Equal(t, service, handler.Service)
 }
 
 func TestSignUpValid(t *testing.T) {
-	var userService MockUserService
-	userService.On("CreateUser", "test@test.com", "password").Return(nil)
-	uc := NewUserController(&userService)
+	var mockUserService MockUserService
+	mockUserService.On("CreateUser", "test@test.com", "password").Return(nil)
+	handler := &UserHandler{Service: &mockUserService}
 	userJSON := `{"email": "test@test.com", "password": "password"}`
 
-	t.Run("valid request", func(t *testing.T) {
-		e := echo.New()
-		req := httptest.NewRequest(http.MethodPost, baseURI+"/basic/signup", strings.NewReader(userJSON))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		ctx := e.NewContext(req, rec)
+	e := setup()
+	req := httptest.NewRequest(http.MethodPost, "/basic/signup", strings.NewReader(userJSON))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
 
-		uc.SignUp(ctx)
-		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "{\"data\":null,\"message\":\"Successfully created user\"}\n", rec.Body.String())
-	})
+	handler.SignUp(ctx)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "{\"data\":null,\"message\":\"Successfully created user\"}\n", rec.Body.String())
+	mockUserService.AssertExpectations(t)
 }
 
-func TestSignUpCreateUserError(t *testing.T) {
-	var userService MockUserService
-	userService.On("CreateUser", "", "").Return(errors.New("error"))
-	uc := NewUserController(&userService)
-	userJSON := `{"email": "", "password": ""}`
-
-	t.Run("failed create user", func(t *testing.T) {
-		e := echo.New()
-		req := httptest.NewRequest(http.MethodPost, baseURI+"/basic/signup", strings.NewReader(userJSON))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		ctx := e.NewContext(req, rec)
-
-		uc.SignUp(ctx)
-		assert.Equal(t, "{\"data\":null,\"message\":\"Failed to create user\"}\n", rec.Body.String())
-		assert.Equal(t, http.StatusInternalServerError, rec.Code)
-	})
-}
-
-func TestSignBindError(t *testing.T) {
-	var userService MockUserService
-	uc := NewUserController(&userService)
+func TestSignWithBindError(t *testing.T) {
+	var mockUserService MockUserService
+	handler := &UserHandler{Service: &mockUserService}
 	userJSON := `{"email": "test@test.com", "invalid": }`
 
-	t.Run("bind error", func(t *testing.T) {
-		e := echo.New()
-		req := httptest.NewRequest(http.MethodPost, baseURI+"/basic/signup", strings.NewReader(userJSON))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		ctx := e.NewContext(req, rec)
+	e := setup()
+	req := httptest.NewRequest(http.MethodPost, "/basic/signup", strings.NewReader(userJSON))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
 
-		uc.SignUp(ctx)
-		assert.Equal(t, "{\"data\":null,\"message\":\"Invalid request\"}\n", rec.Body.String())
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-	})
+	handler.SignUp(ctx)
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	assert.Equal(t, "{\"data\":null,\"message\":\"Invalid request\"}\n", rec.Body.String())
+	mockUserService.AssertExpectations(t)
+}
+
+func TestSignUpWithEmailValidateError(t *testing.T) {
+	var mockUserService MockUserService
+	handler := &UserHandler{Service: &mockUserService}
+	userJSON := `{"email": "test", "password": "password"}`
+
+	e := setup()
+	req := httptest.NewRequest(http.MethodPost, "/basic/signup", strings.NewReader(userJSON))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+
+	handler.SignUp(ctx)
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	assert.Equal(t, "{\"data\":null,\"message\":\"Invalid request\"}\n", rec.Body.String())
+	mockUserService.AssertExpectations(t)
+}
+
+func TestSignUpWithPasswordValidateError(t *testing.T) {
+	var mockUserService MockUserService
+	handler := &UserHandler{Service: &mockUserService}
+	userJSON := `{"email": "test@test.com", "password": "pass"}`
+
+	e := setup()
+	req := httptest.NewRequest(http.MethodPost, "/basic/signup", strings.NewReader(userJSON))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+
+	handler.SignUp(ctx)
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	assert.Equal(t, "{\"data\":null,\"message\":\"Invalid request\"}\n", rec.Body.String())
+	mockUserService.AssertExpectations(t)
+}
+
+func TestSignUpWithCreateUserError(t *testing.T) {
+	var mockUserService MockUserService
+	mockUserService.On("CreateUser", "test@test.com", "password").Return(fmt.Errorf("error"))
+	handler := &UserHandler{Service: &mockUserService}
+	userJSON := `{"email": "test@test.com", "password": "password"}`
+
+	e := setup()
+	req := httptest.NewRequest(http.MethodPost, "/basic/signup", strings.NewReader(userJSON))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+
+	handler.SignUp(ctx)
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	assert.Equal(t, "{\"data\":null,\"message\":\"Failed to create user\"}\n", rec.Body.String())
+	mockUserService.AssertExpectations(t)
 }
