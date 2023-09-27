@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	
+
 	"github.com/soicchi/auth_api/internal/utils"
-	
+
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -32,15 +32,15 @@ func TestNewUserHandler(t *testing.T) {
 
 func TestSignUp(t *testing.T) {
 	tests := []struct {
-		name string
-		in string
+		name     string
+		in       string
 		wantCode int
 		wantBody string
 		wantMock func(mockUserService *MockUserService)
 	}{
 		{
-			name: "Valid signup",
-			in: `{"email": "test@test.com", "password": "password"}`,
+			name:     "Valid signup",
+			in:       `{"email": "test@test.com", "password": "password"}`,
 			wantCode: http.StatusOK,
 			wantBody: "{\"data\":null,\"message\":\"Successfully created user\"}\n",
 			wantMock: func(mockUserService *MockUserService) {
@@ -48,29 +48,29 @@ func TestSignUp(t *testing.T) {
 			},
 		},
 		{
-			name: "Binding error",
-			in: `{"email": "test@test.com", "invalid": }`,
+			name:     "Binding error",
+			in:       `{"email": "test@test.com", "invalid": }`,
 			wantCode: http.StatusBadRequest,
 			wantBody: "{\"data\":null,\"message\":\"Invalid request\"}\n",
 			wantMock: func(mockUserService *MockUserService) {},
 		},
 		{
-			name: "Email validation error",
-			in: `{"email": "test", "password": "password"}`,
+			name:     "Email validation error",
+			in:       `{"email": "test", "password": "password"}`,
 			wantCode: http.StatusBadRequest,
 			wantBody: "{\"data\":null,\"message\":\"Invalid request\"}\n",
 			wantMock: func(mockUserService *MockUserService) {},
 		},
 		{
-			name: "Password validation error",
-			in: `{"email": "test@test.com", "password": "pass"}`,
+			name:     "Password validation error",
+			in:       `{"email": "test@test.com", "password": "pass"}`,
 			wantCode: http.StatusBadRequest,
 			wantBody: "{\"data\":null,\"message\":\"Invalid request\"}\n",
 			wantMock: func(mockUserService *MockUserService) {},
 		},
 		{
-			name: "Create user error",
-			in: `{"email": "test@test.com", "password": "password"}`,
+			name:     "Create user error",
+			in:       `{"email": "test@test.com", "password": "password"}`,
 			wantCode: http.StatusInternalServerError,
 			wantBody: "{\"data\":null,\"message\":\"Failed to create user\"}\n",
 			wantMock: func(mockUserService *MockUserService) {

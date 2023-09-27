@@ -21,15 +21,15 @@ func (m *MockUserRepository) CreateUser(user *models.User) error {
 
 func TestCreateUser(t *testing.T) {
 	tests := []struct {
-		name string
-		inputEmail string
+		name          string
+		inputEmail    string
 		inputPassword string
-		wantMock func(mockUserRepo *MockUserRepository)
-		wantErr bool
+		wantMock      func(mockUserRepo *MockUserRepository)
+		wantErr       bool
 	}{
 		{
-			name: "Valid create user",
-			inputEmail: "test@test.com",
+			name:          "Valid create user",
+			inputEmail:    "test@test.com",
 			inputPassword: "password",
 			wantMock: func(mockUserRepo *MockUserRepository) {
 				mockUserRepo.On("CreateUser", mock.Anything).Return(nil)
@@ -37,8 +37,8 @@ func TestCreateUser(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Create user with create error",
-			inputEmail: "test@test.com",
+			name:          "Create user with create error",
+			inputEmail:    "test@test.com",
 			inputPassword: "password",
 			wantMock: func(mockUserRepo *MockUserRepository) {
 				mockUserRepo.On("CreateUser", mock.Anything).Return(fmt.Errorf("db error"))

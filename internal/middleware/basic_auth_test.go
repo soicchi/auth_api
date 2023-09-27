@@ -13,28 +13,28 @@ import (
 
 func TestCheckBasicAuth(t *testing.T) {
 	tests := []struct {
-		name string
+		name          string
 		inputUsername string
 		inputPassword string
-		want bool
+		want          bool
 	}{
 		{
-			name: "Valid username and password",
+			name:          "Valid username and password",
 			inputUsername: "test",
 			inputPassword: "password",
-			want: true,
+			want:          true,
 		},
 		{
-			name: "Invalid username",
+			name:          "Invalid username",
 			inputUsername: "invalid",
 			inputPassword: "password",
-			want: false,
+			want:          false,
 		},
 		{
-			name: "Invalid password",
+			name:          "Invalid password",
 			inputUsername: "test",
 			inputPassword: "invalid",
-			want: false,
+			want:          false,
 		},
 	}
 
@@ -52,58 +52,58 @@ func TestCheckBasicAuth(t *testing.T) {
 
 func TestBasicAuth(t *testing.T) {
 	tests := []struct {
-		name string
+		name          string
 		inputUsername string
 		inputPassword string
-		wantCode int
-		wantBody string
-		isSetENV bool
-		isSetHeader bool
+		wantCode      int
+		wantBody      string
+		isSetENV      bool
+		isSetHeader   bool
 	}{
 		{
-			name: "Valid basic auth",
+			name:          "Valid basic auth",
 			inputUsername: "test",
 			inputPassword: "password",
-			wantCode: http.StatusOK,
-			wantBody: "test",
-			isSetENV: true,
-			isSetHeader: true,
+			wantCode:      http.StatusOK,
+			wantBody:      "test",
+			isSetENV:      true,
+			isSetHeader:   true,
 		},
 		{
-			name: "Not set environment variables",
+			name:          "Not set environment variables",
 			inputUsername: "test",
 			inputPassword: "password",
-			wantCode: http.StatusInternalServerError,
-			wantBody: "{\"data\":null,\"message\":\"Basic Auth credentials not set\"}\n",
-			isSetENV: false,
-			isSetHeader: true,
+			wantCode:      http.StatusInternalServerError,
+			wantBody:      "{\"data\":null,\"message\":\"Basic Auth credentials not set\"}\n",
+			isSetENV:      false,
+			isSetHeader:   true,
 		},
 		{
-			name: "Missing Authorization header",
+			name:          "Missing Authorization header",
 			inputUsername: "test",
 			inputPassword: "password",
-			wantCode: http.StatusUnauthorized,
-			wantBody: "{\"data\":null,\"message\":\"Not found Authorization header\"}\n",
-			isSetENV: true,
-			isSetHeader: false,
+			wantCode:      http.StatusUnauthorized,
+			wantBody:      "{\"data\":null,\"message\":\"Not found Authorization header\"}\n",
+			isSetENV:      true,
+			isSetHeader:   false,
 		},
 		{
-			name: "Invalid username",
+			name:          "Invalid username",
 			inputUsername: "invalid",
 			inputPassword: "password",
-			wantCode: http.StatusUnauthorized,
-			wantBody: "{\"data\":null,\"message\":\"Invalid username or password\"}\n",
-			isSetENV: true,
-			isSetHeader: true,
+			wantCode:      http.StatusUnauthorized,
+			wantBody:      "{\"data\":null,\"message\":\"Invalid username or password\"}\n",
+			isSetENV:      true,
+			isSetHeader:   true,
 		},
 		{
-			name: "Invalid password",
+			name:          "Invalid password",
 			inputUsername: "test",
 			inputPassword: "invalid",
-			wantCode: http.StatusUnauthorized,
-			wantBody: "{\"data\":null,\"message\":\"Invalid username or password\"}\n",
-			isSetENV: true,
-			isSetHeader: true,
+			wantCode:      http.StatusUnauthorized,
+			wantBody:      "{\"data\":null,\"message\":\"Invalid username or password\"}\n",
+			isSetENV:      true,
+			isSetHeader:   true,
 		},
 	}
 
