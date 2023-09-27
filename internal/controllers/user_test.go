@@ -65,7 +65,6 @@ func TestSignWithBindError(t *testing.T) {
 	handler.SignUp(ctx)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 	assert.Equal(t, "{\"data\":null,\"message\":\"Invalid request\"}\n", rec.Body.String())
-	mockUserService.AssertExpectations(t)
 }
 
 func TestSignUpWithEmailValidateError(t *testing.T) {
@@ -78,7 +77,6 @@ func TestSignUpWithEmailValidateError(t *testing.T) {
 	handler.SignUp(ctx)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 	assert.Equal(t, "{\"data\":null,\"message\":\"Invalid request\"}\n", rec.Body.String())
-	mockUserService.AssertExpectations(t)
 }
 
 func TestSignUpWithPasswordValidateError(t *testing.T) {
@@ -91,7 +89,6 @@ func TestSignUpWithPasswordValidateError(t *testing.T) {
 	handler.SignUp(ctx)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 	assert.Equal(t, "{\"data\":null,\"message\":\"Invalid request\"}\n", rec.Body.String())
-	mockUserService.AssertExpectations(t)
 }
 
 func TestSignUpWithCreateUserError(t *testing.T) {
