@@ -48,7 +48,7 @@ func TestCreateUser(t *testing.T) {
 	defer teardown()
 
 	user := &User{
-		Email:    "email",
+		Email:    "test@test.com",
 		Password: "password",
 	}
 	repo := &UserPostgresRepository{
@@ -62,4 +62,12 @@ func TestCreateUser(t *testing.T) {
 	testDB.First(&createdUser, user.ID)
 	assert.Equal(t, user.Email, createdUser.Email)
 	assert.Equal(t, user.Password, createdUser.Password)
+
+	// duplicate email error
+	dupUser := &User{
+		Email:    "test@test.com",
+		Password: "password",
+	}
+	err = repo.CreateUser(dupUser)
+	assert.Error(t, err)
 }

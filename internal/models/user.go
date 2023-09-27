@@ -6,8 +6,8 @@ import (
 
 type User struct {
 	gorm.Model
-	Email    string `validate:"required,email"`
-	Password string `validate:"required,min=8"`
+	Email    string `gorm:"unique;not null;size:255"`
+	Password string `gorm:"not null;size:255"`
 }
 
 type UserPostgresRepository struct {
