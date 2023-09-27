@@ -25,6 +25,7 @@ func TestCreateUser(t *testing.T) {
 		inputEmail string
 		inputPassword string
 		wantMock func(mockUserRepo *MockUserRepository)
+		wantErr bool
 	}{
 		{
 			name: "Valid create user",
@@ -33,6 +34,7 @@ func TestCreateUser(t *testing.T) {
 			wantMock: func(mockUserRepo *MockUserRepository) {
 				mockUserRepo.On("CreateUser", mock.Anything).Return(nil)
 			},
+			wantErr: false,
 		},
 		{
 			name: "Create user with create error",
@@ -41,6 +43,7 @@ func TestCreateUser(t *testing.T) {
 			wantMock: func(mockUserRepo *MockUserRepository) {
 				mockUserRepo.On("CreateUser", mock.Anything).Return(fmt.Errorf("db error"))
 			},
+			wantErr: true,
 		},
 	}
 
@@ -53,7 +56,7 @@ func TestCreateUser(t *testing.T) {
 
 			err := userService.CreateUser(user.Email, user.Password)
 
-			if err != nil {
+			if err != nil || test.wantErr {
 				assert.Error(t, err)
 				assert.Equal(t, "error creating user db error", err.Error())
 			} else {
