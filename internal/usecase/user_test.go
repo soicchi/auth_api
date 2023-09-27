@@ -19,27 +19,47 @@ func (m *MockUserRepository) CreateUser(user *models.User) error {
 	return args.Error(0)
 }
 
-func TestCreateUserValid(t *testing.T) {
-	var mockUserRepo MockUserRepository
-	user := &models.User{Email: "test@test.com", Password: "password"}
-	mockUserRepo.On("CreateUser", mock.Anything).Return(nil)
-	userService := &UserServiceImpl{Repo: &mockUserRepo}
+func TestCreateUser(t *testing.T) {
+	tests := []struct {
+		name string
+		inputEmail string
+		inputPassword string
+		wantMock func(mockUserRepo *MockUserRepository)
+	}{
+		{
+			name: "Valid create user",
+			inputEmail: "test@test.com",
+			inputPassword: "password",
+			wantMock: func(mockUserRepo *MockUserRepository) {
+				mockUserRepo.On("CreateUser", mock.Anything).Return(nil)
+			},
+		},
+		{
+			name: "Create user with create error",
+			inputEmail: "test@test.com",
+			inputPassword: "password",
+			wantMock: func(mockUserRepo *MockUserRepository) {
+				mockUserRepo.On("CreateUser", mock.Anything).Return(fmt.Errorf("db error"))
+			},
+		},
+	}
 
-	err := userService.CreateUser(user.Email, user.Password)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var mockUserRepo MockUserRepository
+			test.wantMock(&mockUserRepo)
+			userService := &UserServiceImpl{Repo: &mockUserRepo}
+			user := &models.User{Email: test.inputEmail, Password: test.inputPassword}
 
-	assert.NoError(t, err)
-	mockUserRepo.AssertExpectations(t)
-}
+			err := userService.CreateUser(user.Email, user.Password)
 
-func TestCreateUserWithCreateError(t *testing.T) {
-	var mockUserRepo MockUserRepository
-	user := &models.User{Email: "test@test.com", Password: "password"}
-	mockUserRepo.On("CreateUser", mock.Anything).Return(fmt.Errorf("db error"))
-	userService := &UserServiceImpl{Repo: &mockUserRepo}
-
-	err := userService.CreateUser(user.Email, user.Password)
-
-	assert.Error(t, err)
-	assert.Equal(t, "error creating user db error", err.Error())
-	mockUserRepo.AssertExpectations(t)
+			if err != nil {
+				assert.Error(t, err)
+				assert.Equal(t, "error creating user db error", err.Error())
+			} else {
+				assert.NoError(t, err)
+			}
+			mockUserRepo.AssertExpectations(t)
+		})
+	}
 }
