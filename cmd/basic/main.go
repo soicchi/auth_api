@@ -27,5 +27,5 @@ func main() {
 		log.Fatal("API_PORT environment variable not set")
 	}
 
-	e.Logger.Fatal(e.Start(":" + os.Getenv("API_PORT")))
+	e.Logger.Fatal(e.Start(":" + apiPort))
 }
