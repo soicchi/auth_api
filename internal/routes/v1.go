@@ -16,7 +16,13 @@ func setupV1Routes(v1 *echo.Group, db *gorm.DB) {
 	userService := usecase.NewUserServiceImpl(userRepo)
 	userHandler := controllers.NewUserHandler(userService)
 
+	// Basic Auth
 	basic := v1.Group("/basic")
 	basic.Use(middleware.BasicAuth)
 	basic.POST("/signup", userHandler.SignUp)
+
+	// Key Auth
+	key := v1.Group("/key")
+	key.Use(middleware.KeyAuth)
+	key.POST("/signup", userHandler.SignUp)
 }
