@@ -22,5 +22,10 @@ func main() {
 	e := routes.SetupRoutes(db)
 	e.Validator = utils.NewCustomValidator()
 
+	apiPort := os.Getenv("API_PORT")
+	if apiPort == "" {
+		log.Fatal("API_PORT environment variable not set")
+	}
+
 	e.Logger.Fatal(e.Start(":" + os.Getenv("API_PORT")))
 }
