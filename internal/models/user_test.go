@@ -55,13 +55,13 @@ func TestCreateUser(t *testing.T) {
 
 func TestGetUserByEmail(t *testing.T) {
 	tests := []struct {
-		name string
-		input string
-		want *User
+		name    string
+		input   string
+		want    *User
 		wantErr bool
 	}{
 		{
-			name: "success",
+			name:  "success",
 			input: "test@test.com",
 			want: &User{
 				Email:    "test@test.com",
@@ -70,9 +70,9 @@ func TestGetUserByEmail(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "not found",
-			input: "invalid@test.com",
-			want: nil,
+			name:    "not found",
+			input:   "invalid@test.com",
+			want:    nil,
 			wantErr: true,
 		},
 	}
@@ -121,7 +121,7 @@ func teardown() {
 
 func createTestUser() {
 	user := &User{
-		Email: "test@test.com",
+		Email:    "test@test.com",
 		Password: "password",
 	}
 	repo := &UserPostgresRepository{DB: testDB}

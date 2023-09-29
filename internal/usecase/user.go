@@ -13,6 +13,7 @@ type UserServiceImpl struct {
 
 type UserRepository interface {
 	CreateUser(user *models.User) error
+	GetUserByEmail(email string) (*models.User, error)
 }
 
 func NewUserServiceImpl(repo UserRepository) *UserServiceImpl {
@@ -33,6 +34,19 @@ func (s *UserServiceImpl) CreateUser(email string, password string) error {
 
 	if err := s.Repo.CreateUser(user); err != nil {
 		return fmt.Errorf("error creating user %v", err)
+	}
+
+	return nil
+}
+
+func (s *UserServiceImpl) CheckSignIn(email, password string) error {
+	user, err := s.Repo.GetUserByEmail(email)
+	if err != nil {
+		return fmt.Errorf("error getting user by email %v", err)
+	}
+
+	if !utils.ValidatePassword(user.Password, password) {
+		return fmt.Errorf("error validating password")
 	}
 
 	return nil
