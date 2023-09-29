@@ -12,4 +12,5 @@ func InitializeMiddleware(e *echo.Echo) {
 	// Initialize base middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.RequestID())
 }
