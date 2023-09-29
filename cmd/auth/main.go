@@ -10,6 +10,12 @@ import (
 )
 
 func main() {
+	// Validate environment variables
+	envVars := utils.NewENVVars()
+	if err := utils.ValidateENVVars(envVars); err != nil {
+		log.Fatalf("Failed to validate environment variables: %v", err)
+	}
+
 	// Setup database
 	db, err := models.SetupDB()
 	if err != nil {
@@ -22,10 +28,5 @@ func main() {
 	e := routes.SetupRoutes(db)
 	e.Validator = utils.NewCustomValidator()
 
-	apiPort := os.Getenv("API_PORT")
-	if apiPort == "" {
-		log.Fatal("API_PORT environment variable not set")
-	}
-
-	e.Logger.Fatal(e.Start(":" + apiPort))
+	e.Logger.Fatal(e.Start(":" + os.Getenv("API_PORT")))
 }

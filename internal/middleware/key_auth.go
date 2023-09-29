@@ -15,12 +15,7 @@ func KeyAuth(next echo.HandlerFunc) echo.HandlerFunc {
 			return utils.UnauthorizedResponse(c, "Not found API-KEY value")
 		}
 
-		apiKey := os.Getenv("API_KEY")
-		if apiKey == "" {
-			return utils.InternalServerErrorResponse(c, "Please call administrator")
-		}
-
-		if key != apiKey {
+		if key != os.Getenv("API_KEY") {
 			return utils.UnauthorizedResponse(c, "Invalid API-KEY value")
 		}
 

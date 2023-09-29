@@ -57,7 +57,6 @@ func TestBasicAuth(t *testing.T) {
 		inputPassword string
 		wantCode      int
 		wantBody      string
-		isSetENV      bool
 		isSetHeader   bool
 	}{
 		{
@@ -66,16 +65,6 @@ func TestBasicAuth(t *testing.T) {
 			inputPassword: "password",
 			wantCode:      http.StatusOK,
 			wantBody:      "test",
-			isSetENV:      true,
-			isSetHeader:   true,
-		},
-		{
-			name:          "Not set environment variables",
-			inputUsername: "test",
-			inputPassword: "password",
-			wantCode:      http.StatusInternalServerError,
-			wantBody:      "{\"data\":null,\"message\":\"Basic Auth credentials not set\"}\n",
-			isSetENV:      false,
 			isSetHeader:   true,
 		},
 		{
@@ -84,7 +73,6 @@ func TestBasicAuth(t *testing.T) {
 			inputPassword: "password",
 			wantCode:      http.StatusUnauthorized,
 			wantBody:      "{\"data\":null,\"message\":\"Not found Authorization header\"}\n",
-			isSetENV:      true,
 			isSetHeader:   false,
 		},
 		{
@@ -93,7 +81,6 @@ func TestBasicAuth(t *testing.T) {
 			inputPassword: "password",
 			wantCode:      http.StatusUnauthorized,
 			wantBody:      "{\"data\":null,\"message\":\"Invalid username or password\"}\n",
-			isSetENV:      true,
 			isSetHeader:   true,
 		},
 		{
@@ -102,19 +89,14 @@ func TestBasicAuth(t *testing.T) {
 			inputPassword: "invalid",
 			wantCode:      http.StatusUnauthorized,
 			wantBody:      "{\"data\":null,\"message\":\"Invalid username or password\"}\n",
-			isSetENV:      true,
 			isSetHeader:   true,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if test.isSetENV {
-				os.Setenv("BASIC_AUTH_USER", "test")
-				os.Setenv("BASIC_AUTH_PASSWORD", "password")
-			} else {
-				os.Clearenv()
-			}
+			os.Setenv("BASIC_AUTH_USER", "test")
+			os.Setenv("BASIC_AUTH_PASSWORD", "password")
 
 			e := echo.New()
 			req := httptest.NewRequest(http.MethodGet, "/basic/signup", nil)

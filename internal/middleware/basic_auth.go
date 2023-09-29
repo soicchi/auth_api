@@ -11,22 +11,15 @@ import (
 
 func BasicAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		username := os.Getenv("BASIC_AUTH_USER")
-		password := os.Getenv("BASIC_AUTH_PASSWORD")
-
-		if username == "" || password == "" {
-			return utils.InternalServerErrorResponse(c, "Basic Auth credentials not set")
-		}
-
 		// Get the Basic Authentication credentials from the request
-		user, pass, ok := c.Request().BasicAuth()
+		username, password, ok := c.Request().BasicAuth()
 
 		if !ok {
 			return utils.UnauthorizedResponse(c, "Not found Authorization header")
 		}
 
 		// Check credentials
-		if !checkCredentials(user, pass) {
+		if !checkCredentials(username, password) {
 			return utils.UnauthorizedResponse(c, "Invalid username or password")
 		}
 
