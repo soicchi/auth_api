@@ -25,4 +25,5 @@ func setupV1Routes(v1 *echo.Group, db *gorm.DB) {
 	key := v1.Group("/key")
 	key.Use(middleware.KeyAuth)
 	key.POST("/signup", userHandler.SignUp)
+	key.POST("/signin", userHandler.SignIn)
 }

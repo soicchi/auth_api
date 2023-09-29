@@ -23,6 +23,11 @@ func (m *MockUserService) CreateUser(email, password string) error {
 	return args.Error(0)
 }
 
+func (m *MockUserService) CheckSignIn(email, password string) error {
+	args := m.Called(email, password)
+	return args.Error(0)
+}
+
 func TestNewUserHandler(t *testing.T) {
 	service := &MockUserService{}
 	handler := NewUserHandler(service)
@@ -93,6 +98,62 @@ func TestSignUp(t *testing.T) {
 			ctx := e.NewContext(req, rec)
 
 			handler.SignUp(ctx)
+			assert.Equal(t, test.wantCode, rec.Code)
+			assert.Equal(t, test.wantBody, rec.Body.String())
+			mockUserService.AssertExpectations(t)
+		})
+	}
+}
+
+func TestSignIn(t *testing.T) {
+	tests := []struct {
+		name     string
+		in       string
+		wantCode int
+		wantBody string
+		wantMock func(mockUserService *MockUserService)
+	}{
+		{
+			name:     "Valid signin",
+			in:       `{"email": "test@test.com", "password": "password"}`,
+			wantCode: http.StatusOK,
+			wantBody: "{\"data\":null,\"message\":\"Successfully signed in\"}\n",
+			wantMock: func(mockUserService *MockUserService) {
+				mockUserService.On("CheckSignIn", "test@test.com", "password").Return(nil)
+			},
+		},
+		{
+			name:     "Binding error",
+			in:       `{"email": "test@test.com", "invalid": }`,
+			wantCode: http.StatusBadRequest,
+			wantBody: "{\"data\":null,\"message\":\"Invalid request\"}\n",
+			wantMock: func(mockUserService *MockUserService) {},
+		},
+		{
+			name:     "Check signin error",
+			in:       `{"email": "test@test.com", "password": "password"}`,
+			wantCode: http.StatusBadRequest,
+			wantBody: "{\"data\":null,\"message\":\"Invalid email or password\"}\n",
+			wantMock: func(mockUserService *MockUserService) {
+				mockUserService.On("CheckSignIn", "test@test.com", "password").Return(fmt.Errorf("error"))
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var mockUserService MockUserService
+			test.wantMock(&mockUserService)
+			handler := &UserHandler{Service: &mockUserService}
+
+			e := echo.New()
+			e.Validator = utils.NewCustomValidator()
+			req := httptest.NewRequest(http.MethodPost, "/key/signin", strings.NewReader(test.in))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			ctx := e.NewContext(req, rec)
+
+			handler.SignIn(ctx)
 			assert.Equal(t, test.wantCode, rec.Code)
 			assert.Equal(t, test.wantBody, rec.Body.String())
 			mockUserService.AssertExpectations(t)

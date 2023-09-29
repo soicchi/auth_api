@@ -10,6 +10,7 @@ import (
 
 type UserService interface {
 	CreateUser(email, password string) error
+	CheckSignIn(email, password string) error
 }
 
 type UserHandler struct {
@@ -19,6 +20,11 @@ type UserHandler struct {
 type SignUpRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=8"`
+}
+
+type SignInRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func NewUserHandler(service UserService) *UserHandler {
@@ -45,4 +51,19 @@ func (c *UserHandler) SignUp(ctx echo.Context) error {
 	}
 
 	return utils.StatusOKResponse(ctx, "Successfully created user", nil)
+}
+
+func (c *UserHandler) SignIn(ctx echo.Context) error {
+	var req SignInRequest
+	if err := ctx.Bind(&req); err != nil {
+		log.Printf("Failed to bind request: %v", err)
+		return utils.BadRequestResponse(ctx, "Invalid request")
+	}
+
+	if err := c.Service.CheckSignIn(req.Email, req.Password); err != nil {
+		log.Printf("Failed to sign in: %v", err)
+		return utils.BadRequestResponse(ctx, "Invalid email or password")
+	}
+
+	return utils.StatusOKResponse(ctx, "Successfully signed in", nil)
 }
