@@ -35,3 +35,13 @@ func (r *UserPostgresRepository) CreateUser(user *User) error {
 
 	return nil
 }
+
+func (r *UserPostgresRepository) GetUserByEmail(email string) (*User, error) {
+	var user User
+	result := r.DB.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &user, nil
+}
