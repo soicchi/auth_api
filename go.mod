@@ -4,9 +4,10 @@ go 1.21.1
 
 require (
 	github.com/go-playground/validator/v10 v10.15.4
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/stretchr/testify v1.8.2
-	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
+	golang.org/x/crypto v0.11.0
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/gorm v1.25.4
 )
@@ -32,7 +33,6 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.11.0 // indirect

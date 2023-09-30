@@ -45,5 +45,6 @@ func NewENVVars() []string {
 		"BASIC_AUTH_USERNAME",
 		"BASIC_AUTH_PASSWORD",
 		"API_KEY",
+		"JWT_SECRET",
 	}
 }
