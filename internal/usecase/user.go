@@ -13,12 +13,41 @@ type UserServiceImpl struct {
 
 type UserRepository interface {
 	CreateUser(user *models.User) error
-	GetUserByEmail(email string) (*models.User, error)
+	FetchUserByEmail(email string) (*models.User, error)
+	FetchUsers() ([]models.User, error)
+}
+
+type ResponseUser struct {
+	ID    uint   `json:"id"`
+	Email string `json:"email"`
+}
+
+type AllUsersResponse struct {
+	Users []ResponseUser `json:"users"`
 }
 
 func NewUserServiceImpl(repo UserRepository) *UserServiceImpl {
 	return &UserServiceImpl{
 		Repo: repo,
+	}
+}
+
+func newResponseUser(user *models.User) ResponseUser {
+	return ResponseUser{
+		ID:    user.ID,
+		Email: user.Email,
+	}
+}
+
+func newAllUsersResponse(users []models.User) AllUsersResponse {
+	responseUsers := make([]ResponseUser, len(users))
+	for _, user := range users {
+		responseUser := newResponseUser(&user)
+		responseUsers = append(responseUsers, responseUser)
+	}
+
+	return AllUsersResponse{
+		Users: responseUsers,
 	}
 }
 
@@ -40,7 +69,7 @@ func (s *UserServiceImpl) CreateUser(email string, password string) error {
 }
 
 func (s *UserServiceImpl) CheckSignIn(email, password string) error {
-	user, err := s.Repo.GetUserByEmail(email)
+	user, err := s.Repo.FetchUserByEmail(email)
 	if err != nil {
 		return fmt.Errorf("error getting user by email %v", err)
 	}
@@ -50,4 +79,16 @@ func (s *UserServiceImpl) CheckSignIn(email, password string) error {
 	}
 
 	return nil
+}
+
+func (s *UserServiceImpl) FetchAllUsers() (AllUsersResponse, error) {
+	allUsersResponse := AllUsersResponse{}
+	users, err := s.Repo.FetchUsers()
+	if err != nil {
+		return allUsersResponse, fmt.Errorf("error getting users %v", err)
+	}
+
+	allUsersResponse = newAllUsersResponse(users)
+
+	return allUsersResponse, nil
 }
