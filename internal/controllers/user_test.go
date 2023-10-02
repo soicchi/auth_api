@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/soicchi/auth_api/internal/usecase"
 	"github.com/soicchi/auth_api/internal/utils"
 
 	"github.com/labstack/echo/v4"
@@ -26,6 +27,11 @@ func (m *MockUserService) CreateUser(email, password string) error {
 func (m *MockUserService) CheckSignIn(email, password string) error {
 	args := m.Called(email, password)
 	return args.Error(0)
+}
+
+func (m *MockUserService) FetchAllUsers() (usecase.AllUsersResponse, error) {
+	args := m.Called()
+	return args.Get(0).(usecase.AllUsersResponse), args.Error(1)
 }
 
 func TestNewUserHandler(t *testing.T) {
@@ -154,6 +160,51 @@ func TestSignIn(t *testing.T) {
 			ctx := e.NewContext(req, rec)
 
 			handler.SignIn(ctx)
+			assert.Equal(t, test.wantCode, rec.Code)
+			assert.Equal(t, test.wantBody, rec.Body.String())
+			mockUserService.AssertExpectations(t)
+		})
+	}
+}
+
+func TestListUsers(t *testing.T) {
+	tests := []struct {
+		name     string
+		wantCode int
+		wantBody string
+		wantMock func(mockUserService *MockUserService)
+	}{
+		{
+			name:     "Valid list users",
+			wantCode: http.StatusOK,
+			wantBody: "{\"data\":{\"users\":null},\"message\":\"Successfully fetched users\"}\n",
+			wantMock: func(mockUserService *MockUserService) {
+				mockUserService.On("FetchAllUsers").Return(usecase.AllUsersResponse{}, nil)
+			},
+		},
+		{
+			name:     "Fetch all users error",
+			wantCode: http.StatusInternalServerError,
+			wantBody: "{\"data\":null,\"message\":\"Failed to fetch users\"}\n",
+			wantMock: func(mockUserService *MockUserService) {
+				mockUserService.On("FetchAllUsers").Return(usecase.AllUsersResponse{}, fmt.Errorf("error"))
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var mockUserService MockUserService
+			test.wantMock(&mockUserService)
+			handler := &UserHandler{Service: &mockUserService}
+
+			e := echo.New()
+			e.Validator = utils.NewCustomValidator()
+			req := httptest.NewRequest(http.MethodGet, "/key/users", nil)
+			rec := httptest.NewRecorder()
+			ctx := e.NewContext(req, rec)
+
+			handler.ListUsers(ctx)
 			assert.Equal(t, test.wantCode, rec.Code)
 			assert.Equal(t, test.wantBody, rec.Body.String())
 			mockUserService.AssertExpectations(t)

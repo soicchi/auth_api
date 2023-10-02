@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 
+	"github.com/soicchi/auth_api/internal/usecase"
 	"github.com/soicchi/auth_api/internal/utils"
 
 	"github.com/labstack/echo/v4"
@@ -11,6 +12,7 @@ import (
 type UserService interface {
 	CreateUser(email, password string) error
 	CheckSignIn(email, password string) error
+	FetchAllUsers() (usecase.AllUsersResponse, error)
 }
 
 type UserHandler struct {
@@ -66,4 +68,14 @@ func (c *UserHandler) SignIn(ctx echo.Context) error {
 	}
 
 	return utils.StatusOKResponse(ctx, "Successfully signed in", nil)
+}
+
+func (c *UserHandler) ListUsers(ctx echo.Context) error {
+	response, err := c.Service.FetchAllUsers()
+	if err != nil {
+		log.Printf("Failed to fetch users: %v", err)
+		return utils.InternalServerErrorResponse(ctx, "Failed to fetch users")
+	}
+
+	return utils.StatusOKResponse(ctx, "Successfully fetched users", response)
 }
