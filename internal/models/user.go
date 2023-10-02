@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"gorm.io/gorm"
 )
 
@@ -39,9 +40,27 @@ func (r *UserPostgresRepository) CreateUser(user *User) error {
 func (r *UserPostgresRepository) GetUserByEmail(email string) (*User, error) {
 	var user User
 	result := r.DB.Where("email = ?", email).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
 	return &user, nil
+}
+
+func (r *UserPostgresRepository) GetUsers() ([]User, error) {
+	users := []User{}
+	result := r.DB.Find(&users)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return users, nil
+	}
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return users, nil
 }
