@@ -85,7 +85,7 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-func TestGetUserByEmail(t *testing.T) {
+func TestFetUserByEmail(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   string
@@ -122,7 +122,7 @@ func TestGetUserByEmail(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := repo.GetUserByEmail(test.input)
+			got, err := repo.FetchUserByEmail(test.input)
 			if test.wantErr && err != nil {
 				assert.Error(t, err)
 			} else if test.want != nil {
@@ -170,7 +170,7 @@ func TestGetUsers(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := repo.GetUsers()
+			got, err := repo.FetchUsers()
 			if test.wantErr && err != nil {
 				assert.Error(t, err)
 			} else {

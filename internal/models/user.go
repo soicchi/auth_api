@@ -37,7 +37,7 @@ func (r *UserPostgresRepository) CreateUser(user *User) error {
 	return nil
 }
 
-func (r *UserPostgresRepository) GetUserByEmail(email string) (*User, error) {
+func (r *UserPostgresRepository) FetchUserByEmail(email string) (*User, error) {
 	var user User
 	result := r.DB.Where("email = ?", email).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -51,7 +51,7 @@ func (r *UserPostgresRepository) GetUserByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func (r *UserPostgresRepository) GetUsers() ([]User, error) {
+func (r *UserPostgresRepository) FetchUsers() ([]User, error) {
 	users := []User{}
 	result := r.DB.Find(&users)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
