@@ -99,7 +99,7 @@ func TestBasicAuth(t *testing.T) {
 			os.Setenv("BASIC_AUTH_PASSWORD", "password")
 
 			e := echo.New()
-			req := httptest.NewRequest(http.MethodGet, "/basic/signup", nil)
+			req := httptest.NewRequest(http.MethodGet, "/basic/users", nil)
 			if test.isSetHeader {
 				req.Header.Set(echo.HeaderAuthorization, basicAuthHeader(test.inputUsername, test.inputPassword))
 			}

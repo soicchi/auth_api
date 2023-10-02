@@ -138,7 +138,7 @@ func TestJWTAuth(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			e := echo.New()
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			req := httptest.NewRequest(http.MethodGet, "/jwt/users", nil)
 			if test.cookie != nil {
 				req.AddCookie(test.cookie)
 			}

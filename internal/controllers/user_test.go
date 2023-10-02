@@ -200,7 +200,7 @@ func TestListUsers(t *testing.T) {
 
 			e := echo.New()
 			e.Validator = utils.NewCustomValidator()
-			req := httptest.NewRequest(http.MethodGet, "/key/users", nil)
+			req := httptest.NewRequest(http.MethodGet, "/jwt/users", nil)
 			rec := httptest.NewRecorder()
 			ctx := e.NewContext(req, rec)
 

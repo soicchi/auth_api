@@ -19,11 +19,15 @@ func setupV1Routes(v1 *echo.Group, db *gorm.DB) {
 	// Basic Auth
 	basic := v1.Group("/basic")
 	basic.Use(middleware.BasicAuth)
-	basic.POST("/signup", userHandler.SignUp)
+	basic.POST("/users", userHandler.ListUsers)
 
 	// Key Auth
 	key := v1.Group("/key")
 	key.Use(middleware.KeyAuth)
 	key.POST("/signup", userHandler.SignUp)
 	key.POST("/signin", userHandler.SignIn)
+
+	// JWT Auth
+	jwt := v1.Group("/jwt")
+	jwt.GET("/users", userHandler.ListUsers)
 }
