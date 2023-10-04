@@ -18,8 +18,8 @@ type UserPostgresRepository struct {
 
 func NewUser(email, password string, token RefreshToken) *User {
 	return &User{
-		Email:    email,
-		Password: password,
+		Email:        email,
+		Password:     password,
 		RefreshToken: token,
 	}
 }
@@ -30,13 +30,13 @@ func NewUserPostgresRepository(db *gorm.DB) *UserPostgresRepository {
 	}
 }
 
-func (r *UserPostgresRepository) CreateUser(user *User) error {
+func (r *UserPostgresRepository) CreateUser(user *User) (uint, error) {
 	result := r.DB.Create(user)
 	if result.Error != nil {
-		return result.Error
+		return uint(0), result.Error
 	}
 
-	return nil
+	return user.ID, nil
 }
 
 func (r *UserPostgresRepository) FetchUserByEmail(email string) (*User, error) {

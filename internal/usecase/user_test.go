@@ -16,9 +16,13 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) CreateUser(user *models.User) error {
+type MockRefreshTokenRepository struct {
+	mock.Mock
+}
+
+func (m *MockUserRepository) CreateUser(user *models.User) (uint, error) {
 	args := m.Called(user)
-	return args.Error(0)
+	return args.Get(0).(uint), args.Error(1)
 }
 
 func (m *MockUserRepository) FetchUserByEmail(email string) (*models.User, error) {
@@ -29,6 +33,11 @@ func (m *MockUserRepository) FetchUserByEmail(email string) (*models.User, error
 func (m *MockUserRepository) FetchUsers() ([]models.User, error) {
 	args := m.Called()
 	return args.Get(0).([]models.User), args.Error(1)
+}
+
+func (m *MockRefreshTokenRepository) FetchByToken(token string) (models.RefreshToken, error) {
+	args := m.Called(token)
+	return args.Get(0).(models.RefreshToken), args.Error(1)
 }
 
 func TestCreateUser(t *testing.T) {
@@ -44,7 +53,7 @@ func TestCreateUser(t *testing.T) {
 			inputEmail:    "test@test.com",
 			inputPassword: "password",
 			wantMock: func(mockUserRepo *MockUserRepository) {
-				mockUserRepo.On("CreateUser", mock.Anything).Return(nil)
+				mockUserRepo.On("CreateUser", mock.Anything).Return(uint(1), nil)
 			},
 			wantErr: false,
 		},
@@ -53,7 +62,7 @@ func TestCreateUser(t *testing.T) {
 			inputEmail:    "test@test.com",
 			inputPassword: "password",
 			wantMock: func(mockUserRepo *MockUserRepository) {
-				mockUserRepo.On("CreateUser", mock.Anything).Return(fmt.Errorf("db error"))
+				mockUserRepo.On("CreateUser", mock.Anything).Return(uint(0), fmt.Errorf("db error"))
 			},
 			wantErr: true,
 		},
@@ -62,17 +71,22 @@ func TestCreateUser(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			var mockUserRepo MockUserRepository
+			var mockTokenRepo MockRefreshTokenRepository
 			test.wantMock(&mockUserRepo)
-			userService := &UserServiceImpl{Repo: &mockUserRepo}
+			userService := &UserServiceImpl{
+				UserRepo:  &mockUserRepo,
+				TokenRepo: &mockTokenRepo,
+			}
 			user := &models.User{Email: test.inputEmail, Password: test.inputPassword}
 
-			err := userService.CreateUser(user.Email, user.Password)
+			userID, err := userService.CreateUser(user.Email, user.Password)
 
 			if test.wantErr && err != nil {
 				assert.Error(t, err)
 				assert.Equal(t, "error creating user db error", err.Error())
 			} else {
 				assert.NoError(t, err)
+				assert.NotEmpty(t, userID)
 			}
 			mockUserRepo.AssertExpectations(t)
 		})
@@ -131,8 +145,12 @@ func TestCheckSignIn(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			var mockUserRepo MockUserRepository
+			var mockTokenRepo MockRefreshTokenRepository
 			test.wantMock(&mockUserRepo)
-			userService := &UserServiceImpl{Repo: &mockUserRepo}
+			userService := &UserServiceImpl{
+				UserRepo:  &mockUserRepo,
+				TokenRepo: &mockTokenRepo,
+			}
 
 			err := userService.CheckSignIn(test.inputEmail, test.inputPassword)
 
@@ -188,8 +206,12 @@ func TestFetchAllUsers(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			var mockUserRepo MockUserRepository
+			var mockTokenRepo MockRefreshTokenRepository
 			test.wantMock(&mockUserRepo)
-			userService := &UserServiceImpl{Repo: &mockUserRepo}
+			userService := &UserServiceImpl{
+				UserRepo:  &mockUserRepo,
+				TokenRepo: &mockTokenRepo,
+			}
 
 			_, err := userService.FetchAllUsers()
 

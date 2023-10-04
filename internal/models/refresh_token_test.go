@@ -27,8 +27,8 @@ func TestFetchRefreshTokenByToken(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "success fetching refresh token",
-			want: "token",
+			name:    "success fetching refresh token",
+			want:    "token",
 			wantErr: false,
 		},
 		{
@@ -48,11 +48,11 @@ func TestFetchRefreshTokenByToken(t *testing.T) {
 
 	// create user
 	user := &User{
-		Email: "test@test.com",
+		Email:    "test@test.com",
 		Password: "password",
 		RefreshToken: RefreshToken{
 			UserID:    0,
-			Token:	"token",
+			Token:     "token",
 			ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
 		},
 	}

@@ -11,7 +11,7 @@ import (
 func TestNewUser(t *testing.T) {
 	refreshToken := RefreshToken{
 		UserID:    0,
-		Token:    "token",
+		Token:     "token",
 		ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
 	}
 	user := NewUser("email", "password", refreshToken)
@@ -28,35 +28,44 @@ func TestNewUserRepository(t *testing.T) {
 
 func TestCreateUser(t *testing.T) {
 	tests := []struct {
-		name    string
-		want    *User
-		wantErr bool
+		name         string
+		in           *User
+		wantEmail    string
+		wantPassword string
+		wantToken    string
+		wantErr      bool
 	}{
 		{
 			name: "success creating user",
-			want: &User{
+			in: &User{
 				Email:    "test@test.com",
 				Password: "password",
 				RefreshToken: RefreshToken{
 					UserID:    uint(0),
-					Token:    "token",
+					Token:     "token",
 					ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
 				},
 			},
-			wantErr: false,
+			wantEmail:    "test@test.com",
+			wantPassword: "password",
+			wantToken:    "token",
+			wantErr:      false,
 		},
 		{
 			name: "duplicate email error",
-			want: &User{
+			in: &User{
 				Email:    "test@test.com",
 				Password: "password",
 				RefreshToken: RefreshToken{
 					UserID:    0,
-					Token:    "token",
+					Token:     "token",
 					ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
 				},
 			},
-			wantErr: true,
+			wantEmail:    "",
+			wantPassword: "",
+			wantToken:    "",
+			wantErr:      true,
 		},
 	}
 
@@ -70,15 +79,17 @@ func TestCreateUser(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := repo.CreateUser(test.want)
+			userID, err := repo.CreateUser(test.in)
 			if test.wantErr && err != nil {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 				var createdUser User
-				tx.Where("email = ?", test.want.Email).First(&createdUser)
-				assert.Equal(t, test.want.Email, createdUser.Email)
-				assert.Equal(t, test.want.Password, createdUser.Password)
+				tx.Preload("RefreshToken").Where("email = ?", test.wantEmail).First(&createdUser)
+				assert.Equal(t, test.wantEmail, createdUser.Email)
+				assert.Equal(t, test.wantPassword, createdUser.Password)
+				assert.Equal(t, test.wantToken, createdUser.RefreshToken.Token)
+				assert.NotEmpty(t, userID)
 			}
 		})
 	}
@@ -118,11 +129,11 @@ func TestFetUserByEmail(t *testing.T) {
 
 	// create user
 	user := &User{
-		Email: "test@test.com",
+		Email:    "test@test.com",
 		Password: "password",
 		RefreshToken: RefreshToken{
 			UserID:    0,
-			Token:	"token",
+			Token:     "token",
 			ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
 		},
 	}
@@ -178,11 +189,11 @@ func TestGetUsers(t *testing.T) {
 
 	// create user
 	user := &User{
-		Email: "test@test.com",
+		Email:    "test@test.com",
 		Password: "password",
 		RefreshToken: RefreshToken{
 			UserID:    0,
-			Token:	"token",
+			Token:     "token",
 			ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
 		},
 	}

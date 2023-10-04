@@ -8,13 +8,18 @@ import (
 )
 
 type UserServiceImpl struct {
-	Repo UserRepository
+	UserRepo  UserRepository
+	TokenRepo RefreshTokenRepository
 }
 
 type UserRepository interface {
-	CreateUser(user *models.User) error
+	CreateUser(user *models.User) (uint, error)
 	FetchUserByEmail(email string) (*models.User, error)
 	FetchUsers() ([]models.User, error)
+}
+
+type RefreshTokenRepository interface {
+	FetchByToken(token string) (models.RefreshToken, error)
 }
 
 type ResponseUser struct {
@@ -26,9 +31,15 @@ type AllUsersResponse struct {
 	Users []ResponseUser `json:"users"`
 }
 
-func NewUserServiceImpl(repo UserRepository) *UserServiceImpl {
+type CreateUserResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+func NewUserServiceImpl(userRepo UserRepository, tokenRepo RefreshTokenRepository) *UserServiceImpl {
 	return &UserServiceImpl{
-		Repo: repo,
+		UserRepo:  userRepo,
+		TokenRepo: tokenRepo,
 	}
 }
 
@@ -51,25 +62,51 @@ func newAllUsersResponse(users []models.User) AllUsersResponse {
 	}
 }
 
-func (s *UserServiceImpl) CreateUser(email string, password string) error {
-	user := models.NewUser(email, password)
+func newCreateUserResponse(accessToken, refreshToken string) CreateUserResponse {
+	return CreateUserResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+}
+
+// It is not appropriate to return a structure of type Response in this function.
+// But it returns a structure of type Response for the time being due to the responsibility of usecase.
+func (s *UserServiceImpl) CreateUser(email string, password string) (CreateUserResponse, error) {
+	var response CreateUserResponse
 
 	// hash password
-	hashedPassword, err := utils.HashPassword(user.Password)
+	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
-		return fmt.Errorf("error hashing password %v", err)
-	}
-	user.Password = hashedPassword
-
-	if err := s.Repo.CreateUser(user); err != nil {
-		return fmt.Errorf("error creating user %v", err)
+		return response, fmt.Errorf("error hashing password %v", err)
 	}
 
-	return nil
+	// generate refresh token
+	token, err := utils.GenerateToken()
+	if err != nil {
+		return response, fmt.Errorf("error generating token %v", err)
+	}
+
+	refreshToken := models.NewRefreshToken(token)
+	user := models.NewUser(email, hashedPassword, refreshToken)
+
+	userID, err := s.UserRepo.CreateUser(user)
+	if err != nil {
+		return response, fmt.Errorf("error creating user %v", err)
+	}
+
+	// generate access token
+	claims := utils.NewJWTCustomClaims(userID)
+	accessToken, err := claims.GenerateJWT()
+	if err != nil {
+		return response, fmt.Errorf("error generating access token %v", err)
+	}
+
+	response = newCreateUserResponse(accessToken, token)
+	return response, nil
 }
 
 func (s *UserServiceImpl) CheckSignIn(email, password string) error {
-	user, err := s.Repo.FetchUserByEmail(email)
+	user, err := s.UserRepo.FetchUserByEmail(email)
 	if err != nil {
 		return fmt.Errorf("error getting user by email %v", err)
 	}
@@ -83,7 +120,7 @@ func (s *UserServiceImpl) CheckSignIn(email, password string) error {
 
 func (s *UserServiceImpl) FetchAllUsers() (AllUsersResponse, error) {
 	allUsersResponse := AllUsersResponse{}
-	users, err := s.Repo.FetchUsers()
+	users, err := s.UserRepo.FetchUsers()
 	if err != nil {
 		return allUsersResponse, fmt.Errorf("error getting users %v", err)
 	}
