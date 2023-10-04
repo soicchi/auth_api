@@ -10,7 +10,7 @@ import (
 )
 
 type UserService interface {
-	CreateUser(email, password string) error
+	CreateUser(email, password string) (usecase.CreateUserResponse, error)
 	CheckSignIn(email, password string) error
 	FetchAllUsers() (usecase.AllUsersResponse, error)
 }
@@ -47,12 +47,13 @@ func (c *UserHandler) SignUp(ctx echo.Context) error {
 		return utils.BadRequestResponse(ctx, "Invalid request")
 	}
 
-	if err := c.Service.CreateUser(req.Email, req.Password); err != nil {
+	response, err := c.Service.CreateUser(req.Email, req.Password)
+	if err != nil {
 		log.Printf("Failed to create user: %v", err)
 		return utils.InternalServerErrorResponse(ctx, "Failed to create user")
 	}
 
-	return utils.StatusOKResponse(ctx, "Successfully created user", nil)
+	return utils.StatusOKResponse(ctx, "Successfully created user", response)
 }
 
 func (c *UserHandler) SignIn(ctx echo.Context) error {

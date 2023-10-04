@@ -13,7 +13,8 @@ import (
 func setupV1Routes(v1 *echo.Group, db *gorm.DB) {
 	// Initialize user handler
 	userRepo := models.NewUserPostgresRepository(db)
-	userService := usecase.NewUserServiceImpl(userRepo)
+	tokenRepo := models.NewRefreshTokenPostgresRepository(db)
+	userService := usecase.NewUserServiceImpl(userRepo, tokenRepo)
 	userHandler := controllers.NewUserHandler(userService)
 
 	// Basic Auth
@@ -29,5 +30,6 @@ func setupV1Routes(v1 *echo.Group, db *gorm.DB) {
 
 	// JWT Auth
 	jwt := v1.Group("/jwt")
+	jwt.Use(middleware.JWTAuth)
 	jwt.GET("/users", userHandler.ListUsers)
 }

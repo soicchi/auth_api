@@ -19,9 +19,9 @@ type MockUserService struct {
 	mock.Mock
 }
 
-func (m *MockUserService) CreateUser(email, password string) error {
+func (m *MockUserService) CreateUser(email, password string) (usecase.CreateUserResponse, error) {
 	args := m.Called(email, password)
-	return args.Error(0)
+	return args.Get(0).(usecase.CreateUserResponse), args.Error(1)
 }
 
 func (m *MockUserService) CheckSignIn(email, password string) error {
@@ -53,9 +53,12 @@ func TestSignUp(t *testing.T) {
 			name:     "Valid signup",
 			in:       `{"email": "test@test.com", "password": "password"}`,
 			wantCode: http.StatusOK,
-			wantBody: "{\"data\":null,\"message\":\"Successfully created user\"}\n",
+			wantBody: "{\"data\":{\"access_token\":\"access_token\",\"refresh_token\":\"refresh_token\"},\"message\":\"Successfully created user\"}\n",
 			wantMock: func(mockUserService *MockUserService) {
-				mockUserService.On("CreateUser", "test@test.com", "password").Return(nil)
+				mockUserService.On("CreateUser", "test@test.com", "password").Return(usecase.CreateUserResponse{
+					AccessToken:  "access_token",
+					RefreshToken: "refresh_token",
+				}, nil)
 			},
 		},
 		{
@@ -85,7 +88,7 @@ func TestSignUp(t *testing.T) {
 			wantCode: http.StatusInternalServerError,
 			wantBody: "{\"data\":null,\"message\":\"Failed to create user\"}\n",
 			wantMock: func(mockUserService *MockUserService) {
-				mockUserService.On("CreateUser", "test@test.com", "password").Return(fmt.Errorf("error"))
+				mockUserService.On("CreateUser", "test@test.com", "password").Return(usecase.CreateUserResponse{}, fmt.Errorf("error"))
 			},
 		},
 	}
