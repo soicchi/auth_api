@@ -2,15 +2,22 @@ package models
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
 func TestNewUser(t *testing.T) {
-	user := NewUser("email", "password")
+	refreshToken := RefreshToken{
+		UserID:    0,
+		Token:    "token",
+		ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
+	}
+	user := NewUser("email", "password", refreshToken)
 	assert.Equal(t, "email", user.Email)
 	assert.Equal(t, "password", user.Password)
+	assert.Equal(t, refreshToken, user.RefreshToken)
 }
 
 func TestNewUserRepository(t *testing.T) {
@@ -30,6 +37,11 @@ func TestCreateUser(t *testing.T) {
 			want: &User{
 				Email:    "test@test.com",
 				Password: "password",
+				RefreshToken: RefreshToken{
+					UserID:    uint(0),
+					Token:    "token",
+					ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
+				},
 			},
 			wantErr: false,
 		},
@@ -38,6 +50,11 @@ func TestCreateUser(t *testing.T) {
 			want: &User{
 				Email:    "test@test.com",
 				Password: "password",
+				RefreshToken: RefreshToken{
+					UserID:    0,
+					Token:    "token",
+					ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
+				},
 			},
 			wantErr: true,
 		},
@@ -48,7 +65,7 @@ func TestCreateUser(t *testing.T) {
 	defer tx.Rollback()
 
 	repo := &UserPostgresRepository{
-		DB: testDB,
+		DB: tx,
 	}
 
 	for _, test := range tests {
@@ -59,7 +76,7 @@ func TestCreateUser(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				var createdUser User
-				testDB.First(&createdUser, test.want.ID)
+				tx.Where("email = ?", test.want.Email).First(&createdUser)
 				assert.Equal(t, test.want.Email, createdUser.Email)
 				assert.Equal(t, test.want.Password, createdUser.Password)
 			}
@@ -95,12 +112,21 @@ func TestFetUserByEmail(t *testing.T) {
 	tx := testDB.Begin()
 	defer tx.Rollback()
 
-	// create test one user
-	createTestUser()
-
 	repo := &UserPostgresRepository{
-		DB: testDB,
+		DB: tx,
 	}
+
+	// create user
+	user := &User{
+		Email: "test@test.com",
+		Password: "password",
+		RefreshToken: RefreshToken{
+			UserID:    0,
+			Token:	"token",
+			ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
+		},
+	}
+	repo.DB.Create(user)
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -147,8 +173,20 @@ func TestGetUsers(t *testing.T) {
 	defer tx.Rollback()
 
 	repo := &UserPostgresRepository{
-		DB: testDB,
+		DB: tx,
 	}
+
+	// create user
+	user := &User{
+		Email: "test@test.com",
+		Password: "password",
+		RefreshToken: RefreshToken{
+			UserID:    0,
+			Token:	"token",
+			ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
+		},
+	}
+	repo.DB.Create(user)
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -160,18 +198,8 @@ func TestGetUsers(t *testing.T) {
 				assert.Equal(t, test.wantUsers, len(got))
 			}
 			if got != nil {
-				testDB.Delete(got)
+				tx.Delete(got)
 			}
 		})
 	}
-}
-
-// helper functions
-func createTestUser() {
-	user := &User{
-		Email:    "test@test.com",
-		Password: "password",
-	}
-	repo := &UserPostgresRepository{DB: testDB}
-	repo.CreateUser(user)
 }

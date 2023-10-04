@@ -18,30 +18,20 @@ type RefreshTokenPostgresRepository struct {
 	DB *gorm.DB
 }
 
-func NewRefreshTokenPostgresRepository(db *gorm.DB) RefreshTokenPostgresRepository {
-	return RefreshTokenPostgresRepository{
+func NewRefreshTokenPostgresRepository(db *gorm.DB) *RefreshTokenPostgresRepository {
+	return &RefreshTokenPostgresRepository{
 		DB: db,
 	}
 }
 
-func NewRefreshToken(userID uint, token string, expiredAt time.Time) RefreshToken {
+func NewRefreshToken(token string) RefreshToken {
 	return RefreshToken{
-		UserID:    userID,
 		Token:     token,
-		ExpiredAt: expiredAt,
+		ExpiredAt: time.Now().Add(time.Hour * 24 * 7),
 	}
 }
 
-func (r *RefreshTokenPostgresRepository) CreateRefreshToken(refreshToken RefreshToken) error {
-	result := r.DB.Create(&refreshToken)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
-}
-
-func (r *RefreshTokenPostgresRepository) FetchRefreshTokenByToken(token string) (RefreshToken, error) {
+func (r *RefreshTokenPostgresRepository) FetchByToken(token string) (RefreshToken, error) {
 	var refreshToken RefreshToken
 	result := r.DB.Where("token = ?", token).First(&refreshToken)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {

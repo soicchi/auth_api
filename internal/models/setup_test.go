@@ -36,9 +36,15 @@ func setupDB() {
 		panic(err)
 	}
 
-	testDB.AutoMigrate(&User{})
+	testDB.AutoMigrate(
+		&User{},
+		&RefreshToken{},
+	)
 }
 
 func teardown() {
-	testDB.Migrator().DropTable(&User{})
+	testDB.Migrator().DropTable(
+		&User{},
+		&RefreshToken{},
+	)
 }

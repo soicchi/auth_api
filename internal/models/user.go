@@ -7,18 +7,20 @@ import (
 
 type User struct {
 	gorm.Model
-	Email    string `gorm:"unique;not null;size:255"`
-	Password string `gorm:"not null;size:255"`
+	Email        string `gorm:"unique;not null;size:255"`
+	Password     string `gorm:"not null;size:255"`
+	RefreshToken RefreshToken
 }
 
 type UserPostgresRepository struct {
 	DB *gorm.DB
 }
 
-func NewUser(email, password string) *User {
+func NewUser(email, password string, token RefreshToken) *User {
 	return &User{
 		Email:    email,
 		Password: password,
+		RefreshToken: token,
 	}
 }
 

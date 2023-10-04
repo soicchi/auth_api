@@ -13,4 +13,6 @@ go_get:
 	docker compose run --rm api go get ${pkg}
 
 go_test:
+	docker compose up -d test-db
 	docker compose run --rm api go test -v -cover ./...
+	docker compose stop test-db
