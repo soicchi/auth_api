@@ -66,5 +66,8 @@ func (dbConfig *dbConfig) createDSN() string {
 }
 
 func migrate(db *gorm.DB) error {
-	return db.AutoMigrate(&User{})
+	return db.AutoMigrate(
+		&User{},
+		&RefreshToken{},
+	)
 }

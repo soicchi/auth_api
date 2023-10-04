@@ -7,9 +7,9 @@ import (
 
 type User struct {
 	gorm.Model
-	Email        string `gorm:"unique;not null;size:255"`
-	Password     string `gorm:"not null;size:255"`
-	RefreshToken RefreshToken
+	Email        string       `gorm:"unique;not null;size:255"`
+	Password     string       `gorm:"not null;size:255"`
+	RefreshToken RefreshToken `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type UserPostgresRepository struct {

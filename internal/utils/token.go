@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -63,4 +64,13 @@ func parseJWT(tokenString string) (*jwt.Token, error) {
 		}
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
+}
+
+func ExtractBearerToken(authHeader string) (string, error) {
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 {
+		return "", fmt.Errorf("invalid Authorization header format")
+	}
+
+	return parts[1], nil
 }

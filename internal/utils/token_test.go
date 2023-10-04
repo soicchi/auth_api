@@ -129,3 +129,34 @@ func TestParseJWT(t *testing.T) {
 		})
 	}
 }
+
+func TestExtractTokenFromHeader(t *testing.T) {
+	tests := []struct {
+		name    string
+		in      string
+		wantErr bool
+	}{
+		{
+			name:    "valid token",
+			in:      "Bearer token",
+			wantErr: false,
+		},
+		{
+			name:    "invalid Header format",
+			in:      "Bearerinvalid",
+			wantErr: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := ExtractBearerToken(test.in)
+			if test.wantErr && err != nil {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, "token", got)
+			}
+		})
+	}
+}

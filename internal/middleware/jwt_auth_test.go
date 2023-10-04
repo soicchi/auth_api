@@ -14,30 +14,30 @@ import (
 func TestJWTAuth(t *testing.T) {
 	claims := &utils.JWTCustomClaims{UserID: 1}
 	tokenString, _ := claims.GenerateJWT()
+
 	tests := []struct {
 		name       string
-		cookie     *http.Cookie
+		in         string
 		wantStatus int
 	}{
 		{
-			name: "valid token",
-			cookie: &http.Cookie{
-				Name:  "access_token",
-				Value: tokenString,
-			},
+			name:       "valid token",
+			in:         "Bearer " + tokenString,
 			wantStatus: http.StatusOK,
 		},
 		{
-			name:       "not Cookie",
-			cookie:     nil,
+			name:       "empty token",
+			in:         "",
 			wantStatus: http.StatusUnauthorized,
 		},
 		{
-			name: "invalid token",
-			cookie: &http.Cookie{
-				Name:  "access_token",
-				Value: "invalid_token",
-			},
+			name:       "invalid token format",
+			in:         "Bearerinvalidtoken",
+			wantStatus: http.StatusUnauthorized,
+		},
+		{
+			name:       "invalid token",
+			in:         "Bearer invalid_token",
 			wantStatus: http.StatusUnauthorized,
 		},
 	}
@@ -46,10 +46,7 @@ func TestJWTAuth(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			e := echo.New()
 			req := httptest.NewRequest(http.MethodGet, "/jwt/users", nil)
-			if test.cookie != nil {
-				req.AddCookie(test.cookie)
-			}
-
+			req.Header.Set("Authorization", test.in)
 			rec := httptest.NewRecorder()
 			ctx := e.NewContext(req, rec)
 
