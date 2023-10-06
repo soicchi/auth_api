@@ -12,8 +12,8 @@ import (
 )
 
 func TestJWTAuth(t *testing.T) {
-	claims := &utils.JWTCustomClaims{UserID: 1}
-	tokenString, _ := claims.GenerateJWT()
+	userID := uint(1)
+	tokenString, _ := utils.GenerateJWT(userID)
 
 	tests := []struct {
 		name       string

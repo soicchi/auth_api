@@ -95,8 +95,7 @@ func (s *UserServiceImpl) CreateUser(email string, password string) (CreateUserR
 	}
 
 	// generate access token
-	claims := utils.NewJWTCustomClaims(userID)
-	accessToken, err := claims.GenerateJWT()
+	accessToken, err := utils.GenerateJWT(userID)
 	if err != nil {
 		return response, fmt.Errorf("error generating access token %v", err)
 	}

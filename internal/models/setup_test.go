@@ -14,12 +14,10 @@ var testDB *gorm.DB
 func TestMain(m *testing.M) {
 	// set up test database
 	setupDB()
+	defer teardown()
 
 	// run tests
 	code := m.Run()
-
-	// tear down test database
-	teardown()
 
 	os.Exit(code)
 }

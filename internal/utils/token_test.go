@@ -38,33 +38,18 @@ func TestGenerateToken(t *testing.T) {
 	}
 }
 
-func TestNewJWTCustomClaims(t *testing.T) {
-	var testUserID uint = 1
-	customClaims := NewJWTCustomClaims(testUserID)
-
-	assert.Equal(t, testUserID, customClaims.UserID)
-
-	expectedExp := jwt.NewNumericDate(time.Now().Add(1 * time.Hour))
-	assert.Equal(t, expectedExp, customClaims.ExpiresAt)
-
-	expectedIssuedAt := jwt.NewNumericDate(time.Now())
-	assert.Equal(t, expectedIssuedAt, customClaims.IssuedAt)
-	assert.Equal(t, "auth_api", customClaims.Issuer)
-}
-
 func TestGenerateJWT(t *testing.T) {
 	os.Setenv("JWT_SECRET", "test_secret")
+	userID := uint(1)
 
-	claims := &JWTCustomClaims{
-		UserID: 1,
-	}
-	_, err := claims.GenerateJWT()
+	tokenString, err := GenerateJWT(userID)
 	assert.NoError(t, err)
+	assert.NotEmpty(t, tokenString)
 }
 
 func TestValidateJWT(t *testing.T) {
-	claims := &JWTCustomClaims{UserID: 1}
-	tokenString, _ := claims.GenerateJWT()
+	userID := uint(1)
+	tokenString, _ := GenerateJWT(userID)
 	tests := []struct {
 		name    string
 		jwt     string
@@ -97,8 +82,8 @@ func TestValidateJWT(t *testing.T) {
 }
 
 func TestParseJWT(t *testing.T) {
-	claims := &JWTCustomClaims{UserID: 1}
-	tokenString, _ := claims.GenerateJWT()
+	userID := uint(1)
+	tokenString, _ := GenerateJWT(userID)
 	tests := []struct {
 		name    string
 		jwt     string
@@ -156,6 +141,49 @@ func TestExtractTokenFromHeader(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, "token", got)
+			}
+		})
+	}
+}
+
+func TestCheckTokenExpiration(t *testing.T) {
+	tests := []struct {
+		name    string
+		in      jwt.MapClaims
+		wantErr bool
+	}{
+		{
+			name: "valid token",
+			in: jwt.MapClaims{
+				"user_id": uint(1),
+				"exp":     float64(time.Now().Add(time.Hour * 1).Unix()),
+				"sup":     "auth_api",
+			},
+			wantErr: false,
+		},
+		{
+			name:    "not include exp token",
+			in:      jwt.MapClaims{},
+			wantErr: true,
+		},
+		{
+			name: "expired token",
+			in: jwt.MapClaims{
+				"user_id": uint(1),
+				"exp":     float64(time.Now().Add(time.Hour * -1).Unix()),
+				"sup":     "auth_api",
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := checkTokenExpiration(test.in)
+			if test.wantErr && err != nil {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
 		})
 	}
