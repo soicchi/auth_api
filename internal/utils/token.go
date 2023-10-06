@@ -33,34 +33,6 @@ func GenerateJWT(userID uint) (string, error) {
 	return token.SignedString(jwtKey)
 }
 
-func ValidateJWT(tokenString string) error {
-	token, err := parseJWT(tokenString)
-	if err != nil {
-		return fmt.Errorf("error parsing token %v", err)
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		return fmt.Errorf("invalid token")
-	}
-
-	// check token expiration
-	if err := checkTokenExpiration(claims); err != nil {
-		return fmt.Errorf("error checking token expiration %v", err)
-	}
-
-	return nil
-}
-
-func parseJWT(tokenString string) (*jwt.Token, error) {
-	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
-		}
-		return []byte(os.Getenv("JWT_SECRET")), nil
-	})
-}
-
 func ExtractBearerToken(authHeader string) (string, error) {
 	parts := strings.Split(authHeader, " ")
 	if len(parts) != 2 {
@@ -72,17 +44,4 @@ func ExtractBearerToken(authHeader string) (string, error) {
 	}
 
 	return parts[1], nil
-}
-
-func checkTokenExpiration(claims jwt.MapClaims) error {
-	exp, ok := claims["exp"].(float64)
-	if !ok {
-		return fmt.Errorf("error getting token expiration")
-	}
-
-	if time.Now().Unix() > int64(exp) {
-		return fmt.Errorf("token expired")
-	}
-
-	return nil
 }
