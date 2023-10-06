@@ -20,7 +20,7 @@ func TestNewRefreshTokenRepository(t *testing.T) {
 	assert.Equal(t, db, repo.DB)
 }
 
-func TestFetchRefreshTokenByToken(t *testing.T) {
+func TestFetchByToken(t *testing.T) {
 	tests := []struct {
 		name    string
 		want    string

@@ -18,10 +18,6 @@ type UserRepository interface {
 	FetchUsers() ([]models.User, error)
 }
 
-type RefreshTokenRepository interface {
-	FetchByToken(token string) (models.RefreshToken, error)
-}
-
 type ResponseUser struct {
 	ID    uint   `json:"id"`
 	Email string `json:"email"`

@@ -16,10 +16,6 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-type MockRefreshTokenRepository struct {
-	mock.Mock
-}
-
 func (m *MockUserRepository) CreateUser(user *models.User) (uint, error) {
 	args := m.Called(user)
 	return args.Get(0).(uint), args.Error(1)
@@ -33,11 +29,6 @@ func (m *MockUserRepository) FetchUserByEmail(email string) (*models.User, error
 func (m *MockUserRepository) FetchUsers() ([]models.User, error) {
 	args := m.Called()
 	return args.Get(0).([]models.User), args.Error(1)
-}
-
-func (m *MockRefreshTokenRepository) FetchByToken(token string) (models.RefreshToken, error) {
-	args := m.Called(token)
-	return args.Get(0).(models.RefreshToken), args.Error(1)
 }
 
 func TestCreateUser(t *testing.T) {
