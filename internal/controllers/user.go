@@ -34,6 +34,17 @@ type SignUpResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+type UserResponse struct {
+	ID        uint   `json:"id"`
+	Email     string `json:"email"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+type ListUsersResponse struct {
+	Users []UserResponse `json:"users"`
+}
+
 func NewUserHandler(service UserService) *UserHandler {
 	return &UserHandler{
 		Service: service,
@@ -44,6 +55,26 @@ func newSignUpResponse(accessToken, refreshToken string) SignUpResponse {
 	return SignUpResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+	}
+}
+
+func newUserResponse(user models.User) UserResponse {
+	return UserResponse{
+		ID:        user.ID,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt.String(),
+		UpdatedAt: user.UpdatedAt.String(),
+	}
+}
+
+func newListUserResponse(users []models.User) ListUsersResponse {
+	usersResponse := make([]UserResponse, 0)
+	for _, users := range users {
+		usersResponse = append(usersResponse, newUserResponse(users))
+	}
+
+	return ListUsersResponse{
+		Users: usersResponse,
 	}
 }
 
@@ -85,11 +116,13 @@ func (c *UserHandler) SignIn(ctx echo.Context) error {
 }
 
 func (c *UserHandler) ListUsers(ctx echo.Context) error {
-	response, err := c.Service.FetchAllUsers()
+	users, err := c.Service.FetchAllUsers()
 	if err != nil {
 		log.Printf("Failed to fetch users: %v", err)
 		return utils.InternalServerErrorResponse(ctx, "Failed to fetch users")
 	}
+
+	response := newListUserResponse(users)
 
 	return utils.StatusOKResponse(ctx, "Successfully fetched users", response)
 }

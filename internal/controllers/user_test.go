@@ -180,7 +180,7 @@ func TestListUsers(t *testing.T) {
 		{
 			name:     "Valid list users",
 			wantCode: http.StatusOK,
-			wantBody: "{\"data\":[],\"message\":\"Successfully fetched users\"}\n",
+			wantBody: "{\"data\":{\"users\":[]},\"message\":\"Successfully fetched users\"}\n",
 			wantMock: func(mockUserService *MockUserService) {
 				mockUserService.On("FetchAllUsers").Return([]models.User{}, nil)
 			},
