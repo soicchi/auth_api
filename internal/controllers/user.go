@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"log"
+	"time"
 
 	"github.com/soicchi/auth_api/internal/models"
 	"github.com/soicchi/auth_api/internal/utils"
@@ -30,8 +31,7 @@ type SignInRequest struct {
 }
 
 type SignUpResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken string `json:"access_token"`
 }
 
 type UserResponse struct {
@@ -51,10 +51,9 @@ func NewUserHandler(service UserService) *UserHandler {
 	}
 }
 
-func newSignUpResponse(accessToken, refreshToken string) SignUpResponse {
+func newSignUpResponse(accessToken string) SignUpResponse {
 	return SignUpResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		AccessToken: accessToken,
 	}
 }
 
@@ -96,7 +95,9 @@ func (c *UserHandler) SignUp(ctx echo.Context) error {
 		return utils.InternalServerErrorResponse(ctx, "Failed to create user")
 	}
 
-	response := newSignUpResponse(tokens["accessToken"], tokens["refreshToken"])
+	utils.SetCookie(ctx, "refresh_token", tokens["refreshToken"], time.Now().Add(time.Hour*24*7))
+
+	response := newSignUpResponse(tokens["accessToken"])
 	return utils.StatusOKResponse(ctx, "Successfully created user", response)
 }
 

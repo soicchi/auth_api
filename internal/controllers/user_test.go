@@ -53,7 +53,7 @@ func TestSignUp(t *testing.T) {
 			name:     "Valid signup",
 			in:       `{"email": "test@test.com", "password": "password"}`,
 			wantCode: http.StatusOK,
-			wantBody: "{\"data\":{\"access_token\":\"access_token\",\"refresh_token\":\"refresh_token\"},\"message\":\"Successfully created user\"}\n",
+			wantBody: "{\"data\":{\"access_token\":\"access_token\"},\"message\":\"Successfully created user\"}\n",
 			wantMock: func(mockUserService *MockUserService) {
 				mockUserService.On("CreateUser", "test@test.com", "password").Return(map[string]string{
 					"accessToken":  "access_token",
