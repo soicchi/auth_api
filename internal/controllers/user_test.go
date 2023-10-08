@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/soicchi/auth_api/internal/usecase"
+	"github.com/soicchi/auth_api/internal/models"
 	"github.com/soicchi/auth_api/internal/utils"
 
 	"github.com/labstack/echo/v4"
@@ -19,9 +19,9 @@ type MockUserService struct {
 	mock.Mock
 }
 
-func (m *MockUserService) CreateUser(email, password string) (usecase.CreateUserResponse, error) {
+func (m *MockUserService) CreateUser(email, password string) (map[string]string, error) {
 	args := m.Called(email, password)
-	return args.Get(0).(usecase.CreateUserResponse), args.Error(1)
+	return args.Get(0).(map[string]string), args.Error(1)
 }
 
 func (m *MockUserService) CheckSignIn(email, password string) error {
@@ -29,9 +29,9 @@ func (m *MockUserService) CheckSignIn(email, password string) error {
 	return args.Error(0)
 }
 
-func (m *MockUserService) FetchAllUsers() (usecase.AllUsersResponse, error) {
+func (m *MockUserService) FetchAllUsers() ([]models.User, error) {
 	args := m.Called()
-	return args.Get(0).(usecase.AllUsersResponse), args.Error(1)
+	return args.Get(0).([]models.User), args.Error(1)
 }
 
 func TestNewUserHandler(t *testing.T) {
@@ -55,9 +55,9 @@ func TestSignUp(t *testing.T) {
 			wantCode: http.StatusOK,
 			wantBody: "{\"data\":{\"access_token\":\"access_token\",\"refresh_token\":\"refresh_token\"},\"message\":\"Successfully created user\"}\n",
 			wantMock: func(mockUserService *MockUserService) {
-				mockUserService.On("CreateUser", "test@test.com", "password").Return(usecase.CreateUserResponse{
-					AccessToken:  "access_token",
-					RefreshToken: "refresh_token",
+				mockUserService.On("CreateUser", "test@test.com", "password").Return(map[string]string{
+					"accessToken":  "access_token",
+					"refreshToken": "refresh_token",
 				}, nil)
 			},
 		},
@@ -88,7 +88,7 @@ func TestSignUp(t *testing.T) {
 			wantCode: http.StatusInternalServerError,
 			wantBody: "{\"data\":null,\"message\":\"Failed to create user\"}\n",
 			wantMock: func(mockUserService *MockUserService) {
-				mockUserService.On("CreateUser", "test@test.com", "password").Return(usecase.CreateUserResponse{}, fmt.Errorf("error"))
+				mockUserService.On("CreateUser", "test@test.com", "password").Return(map[string]string{}, fmt.Errorf("error"))
 			},
 		},
 	}
@@ -180,9 +180,9 @@ func TestListUsers(t *testing.T) {
 		{
 			name:     "Valid list users",
 			wantCode: http.StatusOK,
-			wantBody: "{\"data\":{\"users\":null},\"message\":\"Successfully fetched users\"}\n",
+			wantBody: "{\"data\":[],\"message\":\"Successfully fetched users\"}\n",
 			wantMock: func(mockUserService *MockUserService) {
-				mockUserService.On("FetchAllUsers").Return(usecase.AllUsersResponse{}, nil)
+				mockUserService.On("FetchAllUsers").Return([]models.User{}, nil)
 			},
 		},
 		{
@@ -190,7 +190,7 @@ func TestListUsers(t *testing.T) {
 			wantCode: http.StatusInternalServerError,
 			wantBody: "{\"data\":null,\"message\":\"Failed to fetch users\"}\n",
 			wantMock: func(mockUserService *MockUserService) {
-				mockUserService.On("FetchAllUsers").Return(usecase.AllUsersResponse{}, fmt.Errorf("error"))
+				mockUserService.On("FetchAllUsers").Return([]models.User{}, fmt.Errorf("error"))
 			},
 		},
 	}

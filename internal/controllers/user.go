@@ -3,16 +3,16 @@ package controllers
 import (
 	"log"
 
-	"github.com/soicchi/auth_api/internal/usecase"
+	"github.com/soicchi/auth_api/internal/models"
 	"github.com/soicchi/auth_api/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 type UserService interface {
-	CreateUser(email, password string) (usecase.CreateUserResponse, error)
+	CreateUser(email, password string) (map[string]string, error)
 	CheckSignIn(email, password string) error
-	FetchAllUsers() (usecase.AllUsersResponse, error)
+	FetchAllUsers() ([]models.User, error)
 }
 
 type UserHandler struct {
@@ -29,9 +29,21 @@ type SignInRequest struct {
 	Password string `json:"password"`
 }
 
+type SignUpResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 func NewUserHandler(service UserService) *UserHandler {
 	return &UserHandler{
 		Service: service,
+	}
+}
+
+func newSignUpResponse(accessToken, refreshToken string) SignUpResponse {
+	return SignUpResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 }
 
@@ -47,12 +59,13 @@ func (c *UserHandler) SignUp(ctx echo.Context) error {
 		return utils.BadRequestResponse(ctx, "Invalid request")
 	}
 
-	response, err := c.Service.CreateUser(req.Email, req.Password)
+	tokens, err := c.Service.CreateUser(req.Email, req.Password)
 	if err != nil {
 		log.Printf("Failed to create user: %v", err)
 		return utils.InternalServerErrorResponse(ctx, "Failed to create user")
 	}
 
+	response := newSignUpResponse(tokens["accessToken"], tokens["refreshToken"])
 	return utils.StatusOKResponse(ctx, "Successfully created user", response)
 }
 

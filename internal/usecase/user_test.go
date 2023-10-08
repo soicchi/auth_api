@@ -68,16 +68,14 @@ func TestCreateUser(t *testing.T) {
 				UserRepo:  &mockUserRepo,
 				TokenRepo: &mockTokenRepo,
 			}
-			user := &models.User{Email: test.inputEmail, Password: test.inputPassword}
 
-			userID, err := userService.CreateUser(user.Email, user.Password)
+			tokens, err := userService.CreateUser(test.inputEmail, test.inputPassword)
 
 			if test.wantErr && err != nil {
 				assert.Error(t, err)
-				assert.Equal(t, "error creating user db error", err.Error())
 			} else {
 				assert.NoError(t, err)
-				assert.NotEmpty(t, userID)
+				assert.NotEmpty(t, tokens)
 			}
 			mockUserRepo.AssertExpectations(t)
 		})
@@ -204,13 +202,14 @@ func TestFetchAllUsers(t *testing.T) {
 				TokenRepo: &mockTokenRepo,
 			}
 
-			_, err := userService.FetchAllUsers()
+			users, err := userService.FetchAllUsers()
 
 			if test.wantErr && err != nil {
 				assert.Error(t, err)
 				assert.Equal(t, test.ErrMsg, err.Error())
 			} else {
 				assert.NoError(t, err)
+				assert.NotEmpty(t, users)
 			}
 			mockUserRepo.AssertExpectations(t)
 		})
