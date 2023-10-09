@@ -10,6 +10,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const (
+	BASE_URI = "/api/v1"
+)
+
 type UserService interface {
 	CreateUser(email, password string) (map[string]string, error)
 	CheckSignIn(email, password string) error
@@ -95,7 +99,8 @@ func (c *UserHandler) SignUp(ctx echo.Context) error {
 		return utils.InternalServerErrorResponse(ctx, "Failed to create user")
 	}
 
-	utils.SetCookie(ctx, "refresh_token", tokens["refreshToken"], time.Now().Add(time.Hour*24*7))
+	targetPath := BASE_URI + "/key/refresh_token"
+	utils.SetCookie(ctx, "refresh_token", tokens["refreshToken"], targetPath, time.Now().Add(time.Hour*24*7))
 
 	response := newSignUpResponse(tokens["accessToken"])
 	return utils.StatusOKResponse(ctx, "Successfully created user", response)

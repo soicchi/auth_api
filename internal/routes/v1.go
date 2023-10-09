@@ -22,11 +22,15 @@ func setupV1Routes(v1 *echo.Group, db *gorm.DB) {
 	basic.Use(middleware.BasicAuth)
 	basic.POST("/users", userHandler.ListUsers)
 
+	refreshTokenRepo := models.NewRefreshTokenPostgresRepository(db)
+	refreshTokenService := usecase.NewRefreshTokenServiceImpl(refreshTokenRepo)
+	refreshTokenHandler := controllers.NewRefreshTokenHandler(refreshTokenService)
 	// Key Auth
 	key := v1.Group("/key")
 	key.Use(middleware.KeyAuth)
 	key.POST("/signup", userHandler.SignUp)
 	key.POST("/signin", userHandler.SignIn)
+	key.POST("/refresh", refreshTokenHandler.PostRefreshToken)
 
 	// JWT Auth
 	jwt := v1.Group("/jwt")

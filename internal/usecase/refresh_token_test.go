@@ -68,14 +68,53 @@ func TestVerifyRefreshToken(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			var mockTokenRepo MockRefreshTokenRepository
 			test.mock(&mockTokenRepo)
-			tokenService := &RefreshTokenServiceImpl{
-				TokenRepo: &mockTokenRepo,
-			}
-			err := tokenService.VerifyRefreshToken("token")
+
+			refreshToken, err := verifyRefreshToken(&mockTokenRepo, "token")
 			if test.wantErr && err != nil {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
+				assert.Equal(t, refreshToken.UserID, uint(1))
+			}
+		})
+	}
+}
+
+func TestRefreshAccessToken(t *testing.T) {
+	tests := []struct {
+		name     string
+		in       string
+		mockRepo func(mockTokenRepo *MockRefreshTokenRepository)
+		wantErr  bool
+	}{
+		{
+			name: "success to refresh access token",
+			in:   "token",
+			mockRepo: func(mockTokenRepo *MockRefreshTokenRepository) {
+				mockTokenRepo.On("FetchByToken", "token").Return(models.RefreshToken{
+					UserID:    1,
+					Token:     "token",
+					ExpiredAt: time.Now().Add(time.Hour * 1),
+				}, nil)
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var mockTokenRepo MockRefreshTokenRepository
+			test.mockRepo(&mockTokenRepo)
+			tokenService := &RefreshTokenServiceImpl{
+				TokenRepo: &mockTokenRepo,
+			}
+
+			accessToken, err := tokenService.RefreshAccessToken(test.in)
+			if test.wantErr && err != nil {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.NotEmpty(t, accessToken)
 			}
 		})
 	}
