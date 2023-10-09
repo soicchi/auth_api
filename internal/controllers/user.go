@@ -99,7 +99,7 @@ func (c *UserHandler) SignUp(ctx echo.Context) error {
 		return utils.InternalServerErrorResponse(ctx, "Failed to create user")
 	}
 
-	targetPath := BASE_URI + "/key/refresh_token"
+	targetPath := BASE_URI + "/key/refresh"
 	utils.SetCookie(ctx, "refresh_token", tokens["refreshToken"], targetPath, time.Now().Add(time.Hour*24*7))
 
 	response := newSignUpResponse(tokens["accessToken"])
