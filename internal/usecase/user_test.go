@@ -113,7 +113,7 @@ func TestCheckSignIn(t *testing.T) {
 			wantMock: func(mockUserRepo *MockUserRepository) {
 				mockUserRepo.On("FetchUserByEmail", "test@test.com").Return(&models.User{}, fmt.Errorf("Not Found"))
 			},
-			ErrMsg:  "error getting user by email Not Found",
+			ErrMsg:  "Not Found",
 			wantErr: true,
 		},
 		{
@@ -187,7 +187,7 @@ func TestFetchAllUsers(t *testing.T) {
 			wantMock: func(mockUserRepo *MockUserRepository) {
 				mockUserRepo.On("FetchUsers").Return([]models.User{}, fmt.Errorf("Not Found"))
 			},
-			ErrMsg:  "error getting users Not Found",
+			ErrMsg:  "Not Found",
 			wantErr: true,
 		},
 	}

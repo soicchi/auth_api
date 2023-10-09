@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -33,7 +34,7 @@ func NewUserPostgresRepository(db *gorm.DB) *UserPostgresRepository {
 func (r *UserPostgresRepository) CreateUser(user *User) (uint, error) {
 	result := r.DB.Create(user)
 	if result.Error != nil {
-		return uint(0), result.Error
+		return user.ID, fmt.Errorf("failed to create user: %w", result.Error)
 	}
 
 	return user.ID, nil
@@ -47,21 +48,21 @@ func (r *UserPostgresRepository) FetchUserByEmail(email string) (*User, error) {
 	}
 
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, fmt.Errorf("failed to fetch user: %w", result.Error)
 	}
 
 	return &user, nil
 }
 
 func (r *UserPostgresRepository) FetchUsers() ([]User, error) {
-	users := []User{}
+	users := make([]User, 0)
 	result := r.DB.Find(&users)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return users, nil
 	}
 
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, fmt.Errorf("failed to fetch users: %w", result.Error)
 	}
 
 	return users, nil

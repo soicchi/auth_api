@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -39,7 +40,7 @@ func (r *RefreshTokenPostgresRepository) FetchByToken(token string) (RefreshToke
 	}
 
 	if result.Error != nil {
-		return refreshToken, result.Error
+		return refreshToken, fmt.Errorf("failed to fetch refresh token: %w", result.Error)
 	}
 
 	return refreshToken, nil

@@ -43,13 +43,13 @@ func (s *UserServiceImpl) CreateUser(email string, password string) (map[string]
 	// hash password
 	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
-		return tokens, fmt.Errorf("error hashing password %v", err)
+		return tokens, err
 	}
 
 	// generate refresh token
 	token, err := utils.GenerateToken()
 	if err != nil {
-		return tokens, fmt.Errorf("error generating token %v", err)
+		return tokens, err
 	}
 
 	refreshToken := models.NewRefreshToken(token)
@@ -57,13 +57,13 @@ func (s *UserServiceImpl) CreateUser(email string, password string) (map[string]
 
 	userID, err := s.UserRepo.CreateUser(user)
 	if err != nil {
-		return tokens, fmt.Errorf("error creating user %v", err)
+		return tokens, err
 	}
 
 	// generate access token
 	accessToken, err := utils.GenerateJWT(userID)
 	if err != nil {
-		return tokens, fmt.Errorf("error generating access token %v", err)
+		return tokens, err
 	}
 
 	tokens["accessToken"] = accessToken
@@ -75,7 +75,7 @@ func (s *UserServiceImpl) CreateUser(email string, password string) (map[string]
 func (s *UserServiceImpl) CheckSignIn(email, password string) error {
 	user, err := s.UserRepo.FetchUserByEmail(email)
 	if err != nil {
-		return fmt.Errorf("error getting user by email %v", err)
+		return err
 	}
 
 	if !utils.ValidatePassword(user.Password, password) {
@@ -88,7 +88,7 @@ func (s *UserServiceImpl) CheckSignIn(email, password string) error {
 func (s *UserServiceImpl) FetchAllUsers() ([]models.User, error) {
 	users, err := s.UserRepo.FetchUsers()
 	if err != nil {
-		return nil, fmt.Errorf("error getting users %v", err)
+		return nil, err
 	}
 
 	if users == nil {

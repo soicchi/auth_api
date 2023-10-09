@@ -25,12 +25,12 @@ func NewRefreshTokenServiceImpl(tokenRepo RefreshTokenRepository) *RefreshTokenS
 func (s *RefreshTokenServiceImpl) RefreshAccessToken(token string) (string, error) {
 	refreshToken, err := verifyRefreshToken(s.TokenRepo, token)
 	if err != nil {
-		return "", fmt.Errorf("failed to verify refresh token: %w", err)
+		return "", err
 	}
 
 	accessToken, err := utils.GenerateJWT(refreshToken.UserID)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate access token: %w", err)
+		return "", err
 	}
 
 	return accessToken, nil
@@ -39,7 +39,7 @@ func (s *RefreshTokenServiceImpl) RefreshAccessToken(token string) (string, erro
 func verifyRefreshToken(repo RefreshTokenRepository, token string) (models.RefreshToken, error) {
 	refreshToken, err := repo.FetchByToken(token)
 	if err != nil {
-		return refreshToken, fmt.Errorf("failed to fetch refresh token: %w", err)
+		return refreshToken, err
 	}
 
 	if refreshToken.Token == "" {
