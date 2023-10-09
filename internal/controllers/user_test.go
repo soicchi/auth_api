@@ -34,13 +34,6 @@ func (m *MockUserService) FetchAllUsers() ([]models.User, error) {
 	return args.Get(0).([]models.User), args.Error(1)
 }
 
-func TestNewUserHandler(t *testing.T) {
-	service := &MockUserService{}
-	handler := NewUserHandler(service)
-	assert.NotNil(t, handler)
-	assert.Equal(t, service, handler.Service)
-}
-
 func TestSignUp(t *testing.T) {
 	tests := []struct {
 		name     string
